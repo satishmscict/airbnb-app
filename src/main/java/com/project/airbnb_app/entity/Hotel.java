@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class Hotel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
@@ -33,7 +33,7 @@ public class Hotel {
     @Column(name = "photos", columnDefinition = "TEXT[]")
     private String[] photos;
 
-    @Column(name = "amenities", nullable = false, columnDefinition = "TEXT[]")
+    @Column(name = "amenities", columnDefinition = "TEXT[]")
     private String[] amenities;
 
     @Column(nullable = false)

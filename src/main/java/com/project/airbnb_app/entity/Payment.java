@@ -18,13 +18,13 @@ import java.time.LocalDateTime;
 public class Payment {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
     private Long transactionId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, scale = 6, precision = 2)
     private BigDecimal price;
 
     @Enumerated(EnumType.STRING)

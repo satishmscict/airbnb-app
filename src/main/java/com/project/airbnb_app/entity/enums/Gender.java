@@ -1,4 +1,4 @@
-package com.project.airbnb_app.entity;
+package com.project.airbnb_app.entity.enums;
 
 public enum Gender {
     MALE,

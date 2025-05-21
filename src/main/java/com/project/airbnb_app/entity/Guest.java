@@ -1,5 +1,6 @@
 package com.project.airbnb_app.entity;
 
+import com.project.airbnb_app.entity.enums.Gender;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;

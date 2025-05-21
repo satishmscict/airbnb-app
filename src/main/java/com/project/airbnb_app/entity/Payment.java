@@ -27,7 +27,7 @@ public class Payment {
     @Column(nullable = false)
     private Long transactionId;
 
-    @Column(nullable = false, scale = 6, precision = 2)
+    @Column(nullable = false, scale = 10, precision = 2)
     private BigDecimal price;
 
     @Enumerated(EnumType.STRING)

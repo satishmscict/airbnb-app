@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -30,7 +32,7 @@ public class Room {
     @Column(
             name = "base_price",
             nullable = false,
-            scale = 6,
+            scale = 10,
             precision = 2
     )
     private BigDecimal basePrice;
@@ -47,7 +49,9 @@ public class Room {
     @Column(nullable = false)
     private Integer capacity;
 
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
 }

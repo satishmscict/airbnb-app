@@ -2,6 +2,8 @@ package com.project.airbnb_app.entity;
 
 import com.project.airbnb_app.entity.enums.Gender;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -24,7 +26,9 @@ public class Guest {
     @Column(nullable = false)
     private Gender gender;
 
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
 }

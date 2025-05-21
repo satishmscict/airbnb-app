@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -48,7 +50,9 @@ public class Inventory {
     @Column(name = "surge_factor", scale = 1, precision = 2)
     private BigDecimal surgeFactor;
 
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
 }

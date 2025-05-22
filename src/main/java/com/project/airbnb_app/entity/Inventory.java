@@ -1,21 +1,14 @@
 package com.project.airbnb_app.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Entity
 @Table(
         name = "inventory",
@@ -24,7 +17,7 @@ import java.time.LocalDateTime;
                 columnNames = {"hotel_id", "room_id", "date"}
         )
 )
-public class Inventory {
+public class Inventory extends CreatedAndUpdatedTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -32,27 +25,30 @@ public class Inventory {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hotel_id", nullable = false)
-    private Hotel hotelId;
+    private Hotel hotel;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)
-    private Room roomId;
+    private Room room;
 
     @Column(nullable = false)
     private LocalDate date;
 
     @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
-    private Integer bookedCount;
+    private Integer bookedRoomsCount;
 
     @Column(nullable = false)
-    private Integer totalCount;
+    private Integer totalRoomsCount;
 
-    @Column(name = "surge_factor", scale = 1, precision = 2)
+    @Column(name = "surge_factor", precision = 5, scale = 2)
     private BigDecimal surgeFactor;
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price; // surgeFactor * basePrice
 
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    @Column(nullable = false)
+    private String city;
+
+    @Column(nullable = false)
+    private Boolean closed;
 }

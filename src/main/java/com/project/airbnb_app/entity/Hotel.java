@@ -1,22 +1,14 @@
 package com.project.airbnb_app.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "hotel")
-public class Hotel {
+public class Hotel extends CreatedAndUpdatedTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,20 +22,16 @@ public class Hotel {
 
     @Embedded
     @Column(nullable = false)
-    private ContactInfo  contactInfo;
+    private HotelContactInfo hotelContactInfo;
 
-    @Column(name = "photos", columnDefinition = "TEXT[]")
+    @Column(columnDefinition = "TEXT[]")
     private String[] photos;
 
-    @Column(name = "amenities", columnDefinition = "TEXT[]")
+    @Column(columnDefinition = "TEXT[]")
     private String[] amenities;
 
     @Column(nullable = false)
     private Boolean active;
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    //TODO: Add rooms and owner later.
 }

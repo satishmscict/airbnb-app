@@ -17,12 +17,12 @@ public class ApiResponse<T> {
     }
 
     public ApiResponse(T data) {
-        super();
+        this();
         this.data = data;
     }
 
     public ApiResponse(ApiError error) {
-        super();
+        this();
         this.error = error;
     }
 }

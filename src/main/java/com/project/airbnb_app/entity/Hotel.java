@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -33,5 +35,10 @@ public class Hotel extends CreatedAndUpdatedTime {
     @Column(nullable = false)
     private Boolean active;
 
-    //TODO: Add rooms and owner later.
+    @OneToMany(mappedBy = "hotel")
+    private List<Room> rooms;
+
+    @OneToOne
+    @JoinColumn(name = "owner_id")
+    private User owner;
 }

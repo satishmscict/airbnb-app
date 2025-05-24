@@ -31,8 +31,10 @@ public class RoomServiceImpl implements RoomService {
         Room savedRoom = roomRepository.save(room);
         log.info("Room successfully saved with the id: {}", room.getId());
 
+        log.info("Check hotel active status: {} and generate inventory if hotel already activated.", hotel.getActive());
         if (hotel.getActive()) {
             inventoryService.createInventory(hotelId, savedRoom.getId());
+            log.info("Inventory generated for the room id: {}.", savedRoom.getId());
         }
 
         return modelMapper.map(savedRoom, RoomDto.class);
@@ -40,6 +42,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public Boolean deleteRoom(Long hotelId, Long roomId) {
+        log.info("Delete room started witg the hotel id: {} and room id: {}.", hotelId, roomId);
         if (!hotelRepository.existsById(hotelId)) {
             log.info("Hotel not found with the id: {}", hotelId);
             throw new ResourceNotFoundException("Hotel not found with the id: " + hotelId);
@@ -50,8 +53,9 @@ public class RoomServiceImpl implements RoomService {
             throw new ResourceNotFoundException("Room not found with the id: " + roomId);
         }
 
+        log.info("Hotel and Room exist, continue deleting...");
         roomRepository.deleteById(roomId);
-        log.info("Room with the id {}  deleted succeefully.", roomId);
+        log.info("Room with the id {}  deleted successfully.", roomId);
         return true;
     }
 
@@ -68,33 +72,34 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public RoomDto updateRoomByHotelIdAndRoomId(Long hotelId, Long roomId, RoomDto roomDto) {
+        log.info("Start update room by hotel id: {} and room id: {}.", hotelId, roomId);
         Hotel hotel = getHotel(hotelId);
 
-        log.debug("Updating RoomDto");
+        log.debug("Updating RoomDto.");
         roomDto.setId(roomId);
         Room room = modelMapper.map(roomDto, Room.class);
         room.setHotel(hotel);
         Room savedRoom = roomRepository.save(room);
-        log.info("Room updated successfully");
+        log.info("Room updated successfully.");
 
         return modelMapper.map(savedRoom, RoomDto.class);
     }
 
     private Hotel getHotel(Long hotelId) {
-        log.info("Get hotel by hotel id: {}", hotelId);
+        log.info("Get hotel by hotel id: {}.", hotelId);
         Hotel hotel = hotelRepository
                 .findById(hotelId)
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel not found with the id: " + hotelId));
-        log.info("Hotel found with name of {}", hotel.getName());
+        log.info("Hotel found with name of {}.", hotel.getName());
         return hotel;
     }
 
     private Room getRoom(Long roomId) {
-        log.info("Get room by room id: {}", roomId);
+        log.info("Get room by room id: {}.", roomId);
         Room room = roomRepository
                 .findById(roomId)
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel not found with the id: " + roomId));
-        log.info("Room found with the room capacity of {}", room.getRoomCapacity());
+        log.info("Room found with the room capacity of {}.", room.getRoomCapacity());
         return room;
     }
 }

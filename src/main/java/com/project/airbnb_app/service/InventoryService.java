@@ -8,5 +8,5 @@ public interface InventoryService {
 
     List<InventoryDto> createInventory(Long hotelId, Long roomId);
 
-    Boolean deleteInventory(Long hotelId, Long roomId);
+    void deleteInventory(Long hotelId, Long roomId);
 }

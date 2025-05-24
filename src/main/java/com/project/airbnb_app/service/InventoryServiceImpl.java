@@ -31,6 +31,21 @@ public class InventoryServiceImpl implements InventoryService {
     private final ModelMapper modelMapper;
     private final RoomRepository roomRepository;
 
+    private static Inventory buildInventory(Hotel hotel, Room room, LocalDate date) {
+        return Inventory
+                .builder()
+                .hotel(hotel)
+                .room(room)
+                .date(date)
+                .bookedRoomsCount(0)
+                .totalRoomsCount(room.getTotalRoomCount())
+                .surgeFactor(BigDecimal.ONE)
+                .price(BigDecimal.ONE.multiply(room.getBasePrice()))
+                .city(hotel.getCity())
+                .closed(false)
+                .build();
+    }
+
     @Override
     public List<InventoryDto> createInventory(Long hotelId, Long roomId) {
         log.info("Fetch hotel by id {}", hotelId);
@@ -43,7 +58,7 @@ public class InventoryServiceImpl implements InventoryService {
         Room room = roomRepository
                 .findById(roomId)
                 .orElseThrow(() -> new ResourceNotFoundException("Room not found with the id: " + roomId));
-        log.info("Room fonund with the id: {}", roomId);
+        log.info("Room founnd with the id: {}", roomId);
 
         log.info("Generate inventory for next {} days", TOTAL_INVENTORY_DAYS);
         LocalDate currentDate = LocalDate.now();
@@ -51,18 +66,7 @@ public class InventoryServiceImpl implements InventoryService {
 
         List<Inventory> generateInventory = new ArrayList<>();
         for (LocalDate date = currentDate; !date.isAfter(endDate); date = date.plusDays(1)) {
-            Inventory inventory = Inventory
-                    .builder()
-                    .hotel(hotel)
-                    .room(room)
-                    .date(date)
-                    .bookedRoomsCount(0)
-                    .totalRoomsCount(room.getTotalRoomCount())
-                    .surgeFactor(BigDecimal.ONE)
-                    .price(BigDecimal.ONE.multiply(room.getBasePrice()))
-                    .city(room.getHotel().getCity())
-                    .closed(false)
-                    .build();
+            Inventory inventory = buildInventory(hotel, room, date);
             generateInventory.add(inventory);
         }
         List<Inventory> inventoryList = inventoryRepository.saveAll(generateInventory);
@@ -76,8 +80,9 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     @Transactional(value = Transactional.TxType.REQUIRES_NEW)
-    public Boolean deleteInventory(Long hotelId, Long roomId) {
+    public void deleteInventory(Long hotelId, Long roomId) {
+        log.info("Delete inventory with the hotel id: {} and room id: {}.", hotelId, roomId);
         inventoryRepository.deleteAllByHotelIdAndRoomId(hotelId, roomId);
-        return true;
+        log.info("Delete inventory with the hotel id: {} and room id: {} is completed.", hotelId, roomId);
     }
 }

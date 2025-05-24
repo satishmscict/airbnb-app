@@ -2,14 +2,14 @@ package com.project.airbnb_app.entity;
 
 import com.project.airbnb_app.entity.enums.Gender;
 import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.time.LocalDateTime;
-
+@Getter
+@Setter
 @Entity
 @Table(name = "guest")
-public class Guest {
+public class Guest extends CreatedAndUpdatedTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,9 +26,6 @@ public class Guest {
     @Column(nullable = false)
     private Gender gender;
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    @Column(nullable = false)
+    private Integer age;
 }

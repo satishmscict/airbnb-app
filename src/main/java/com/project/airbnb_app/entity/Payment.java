@@ -2,41 +2,28 @@ package com.project.airbnb_app.entity;
 
 import com.project.airbnb_app.entity.enums.PaymentStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Entity
 @Table(name = "payment")
-public class Payment {
+public class Payment extends CreatedAndUpdatedTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long transactionId;
+    @Column(unique = true, nullable = false)
+    private String transactionId;
 
-    @Column(nullable = false, scale = 10, precision = 2)
-    private BigDecimal price;
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PaymentStatus status;
-
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    private PaymentStatus paymentStatus;
 }

@@ -1,39 +1,32 @@
 package com.project.airbnb_app.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "room")
-public class Room {
+public class Room extends CreatedAndUpdatedTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "hotel_id", nullable = false)
-    private Hotel hotelId;
+    private Hotel hotel;
 
+    @Column(nullable = false)
     private String type;
 
     @Column(
-            name = "base_price",
             nullable = false,
-            scale = 10,
-            precision = 2
+            precision = 10,
+            scale = 2
     )
     private BigDecimal basePrice;
 
@@ -44,14 +37,8 @@ public class Room {
     private String[] photos;
 
     @Column(nullable = false)
-    private Integer totalCount;
+    private Integer totalRoomCount;
 
     @Column(nullable = false)
-    private Integer capacity;
-
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    private Integer roomCapacity;
 }

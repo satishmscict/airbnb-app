@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 public class RoomServiceImpl implements RoomService {
 
     private final HotelRepository hotelRepository;
+    private final InventoryService inventoryService;
     private final ModelMapper modelMapper;
     private final RoomRepository roomRepository;
 
@@ -29,6 +30,10 @@ public class RoomServiceImpl implements RoomService {
         room.setHotel(hotel);
         Room savedRoom = roomRepository.save(room);
         log.info("Room successfully saved with the id: {}", room.getId());
+
+        if (hotel.getActive()) {
+            inventoryService.createInventory(hotelId, savedRoom.getId());
+        }
 
         return modelMapper.map(savedRoom, RoomDto.class);
     }

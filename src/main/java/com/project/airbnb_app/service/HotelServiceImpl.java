@@ -2,8 +2,10 @@ package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.dto.HotelDto;
 import com.project.airbnb_app.entity.Hotel;
+import com.project.airbnb_app.entity.Room;
 import com.project.airbnb_app.exception.ResourceNotFoundException;
 import com.project.airbnb_app.repository.HotelRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -16,18 +18,26 @@ import java.util.List;
 @Slf4j
 public class HotelServiceImpl implements HotelService {
 
+    private final InventoryService inventoryService;
     private final HotelRepository hotelRepository;
     private final ModelMapper modelMapper;
 
     @Override
     public HotelDto activateHotel(Long hotelId) {
+        log.info("Activate hotel with the id: {}", hotelId);
         Hotel hotel = hotelRepository
                 .findById(hotelId)
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel not found with the id: " + hotelId));
         hotel.setActive(true);
         Hotel savedHotel = hotelRepository.save(hotel);
+        log.info("Hotel activated successgully.");
 
-        //TODO:  create inventory when activate the hotel.
+        log.info("Create inventory for each room.");
+        for (Room room : hotel.getRooms()) {
+            inventoryService.createInventory(hotelId, room.getId());
+        }
+        log.info("Create inventory for each room is successfully completed.");
+
         return modelMapper.map(savedHotel, HotelDto.class);
     }
 
@@ -44,13 +54,21 @@ public class HotelServiceImpl implements HotelService {
     }
 
     @Override
+    @Transactional
     public void deleteHotelById(Long hotelId) {
-        if (!hotelRepository.existsById(hotelId)) {
-            throw new ResourceNotFoundException("Hotel not found with the id: " + hotelId);
-        }
+        log.info("Fetch hotel details with the id: {}", hotelId);
+        Hotel hotel = hotelRepository
+                .findById(hotelId)
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found with the id: " + hotelId));
 
+        log.info("Hotel found with the id {} and total {} rooms, now need to delete inventory of each room", hotelId, hotel.getRooms().size());
+        for (Room room : hotel.getRooms()) {
+            inventoryService.deleteInventory(hotel.getId(), room.getId());
+        }
+        log.info("Deleted inventory record for the total rooms {}", hotel.getRooms().size());
+
+        log.info("Child records of inventory deleted. Now delete the hotel entity with the id: {}", hotelId);
         hotelRepository.deleteById(hotelId);
-        //TODO:: delete inventory details.
     }
 
     @Override

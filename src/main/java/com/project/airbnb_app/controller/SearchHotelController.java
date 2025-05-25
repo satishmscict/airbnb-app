@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/hotels")
 @Tag(name = "Search Hotel API")
-public class BrowseHotelController {
+public class SearchHotelController {
 
     private final InventoryService inventoryService;
 

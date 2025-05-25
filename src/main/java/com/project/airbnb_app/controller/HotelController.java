@@ -2,6 +2,7 @@ package com.project.airbnb_app.controller;
 
 import com.project.airbnb_app.dto.HotelDto;
 import com.project.airbnb_app.service.HotelService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/admin/hotels")
 @RequiredArgsConstructor
+@Tag(name = "Admin Hotel API")
 public class HotelController {
 
     private final HotelService hotelService;

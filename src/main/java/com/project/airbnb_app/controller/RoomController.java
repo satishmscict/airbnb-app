@@ -2,6 +2,7 @@ package com.project.airbnb_app.controller;
 
 import com.project.airbnb_app.dto.RoomDto;
 import com.project.airbnb_app.service.RoomService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -10,18 +11,19 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/admin/rooms")
+@RequestMapping("/api/v1/admin/hotels/{hotelId}/rooms")
+@Tag(name = "Rooms API")
 public class RoomController {
 
     private final RoomService roomService;
 
-    @PostMapping("/hotel/{hotelId}")
+    @PostMapping
     public ResponseEntity<RoomDto> createRoom(@PathVariable Long hotelId, @RequestBody @Valid RoomDto roomDto) {
         RoomDto savedRoomDto = roomService.createRoom(hotelId, roomDto);
         return new ResponseEntity<>(savedRoomDto, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/{roomId}/hotels/{hotelId}")
+    @DeleteMapping("/{roomId}")
     public ResponseEntity<Boolean> deleteRoomByHotelIdAndRoomId(
             @PathVariable Long roomId,
             @PathVariable Long hotelId
@@ -30,7 +32,7 @@ public class RoomController {
 
     }
 
-    @GetMapping("/{roomId}/hotels/{hotelId}")
+    @GetMapping("/{roomId}")
     public ResponseEntity<RoomDto> getRoomByHotelIdAndRoomId(
             @PathVariable Long hotelId,
             @PathVariable Long roomId
@@ -39,7 +41,7 @@ public class RoomController {
         return ResponseEntity.ok(roomDto);
     }
 
-    @PutMapping("/{roomId}/hotels/{hotelId}")
+    @PutMapping("/{roomId}")
     public ResponseEntity<RoomDto> updateRoomByHotelIdAndRoomId(
             @PathVariable Long hotelId,
             @PathVariable Long roomId,

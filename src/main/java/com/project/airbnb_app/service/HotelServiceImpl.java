@@ -63,7 +63,7 @@ public class HotelServiceImpl implements HotelService {
 
         log.info("Hotel found with the id {} and total {} rooms, now need to delete inventory of each room.", hotelId, hotel.getRooms().size());
         for (Room room : hotel.getRooms()) {
-            inventoryService.deleteInventory(hotel.getId(), room.getId());
+            inventoryService.deleteInventoryByHotelIdAndRoomId(hotel.getId(), room.getId());
         }
         log.info("Deleted inventory record for the total rooms {}.", hotel.getRooms().size());
 

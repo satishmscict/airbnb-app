@@ -6,6 +6,7 @@ import com.project.airbnb_app.entity.Room;
 import com.project.airbnb_app.exception.ResourceNotFoundException;
 import com.project.airbnb_app.repository.HotelRepository;
 import com.project.airbnb_app.repository.RoomRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -41,21 +42,23 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
+    @Transactional
     public Boolean deleteRoom(Long hotelId, Long roomId) {
-        log.info("Delete room started witg the hotel id: {} and room id: {}.", hotelId, roomId);
+        log.info("Delete room started with the hotel id: {} and room id: {}.", hotelId, roomId);
         if (!hotelRepository.existsById(hotelId)) {
             log.info("Hotel not found with the id: {}", hotelId);
             throw new ResourceNotFoundException("Hotel not found with the id: " + hotelId);
         }
 
-        if (!roomRepository.existsById(roomId)) {
-            log.info("Room not found with the id: {}", roomId);
-            throw new ResourceNotFoundException("Room not found with the id: " + roomId);
-        }
+        Room room = roomRepository
+                .findById(roomId)
+                .orElseThrow(() -> new ResourceNotFoundException("Room not found with the id: " + roomId));
 
         log.info("Hotel and Room exist, continue deleting...");
-        roomRepository.deleteById(roomId);
-        log.info("Room with the id {}  deleted successfully.", roomId);
+        roomRepository.deleteByIdAndHotelId(room.getId(), hotelId);
+        inventoryService.deleteInventoryByHotelIdAndRoomId(hotelId, room.getId());
+        log.info("Room with the id {}  and related inventories deleted successfully.", roomId);
+
         return true;
     }
 

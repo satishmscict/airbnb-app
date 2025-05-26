@@ -4,7 +4,6 @@ import com.project.airbnb_app.dto.RoomDto;
 import com.project.airbnb_app.entity.Hotel;
 import com.project.airbnb_app.entity.Room;
 import com.project.airbnb_app.exception.ResourceNotFoundException;
-import com.project.airbnb_app.repository.HotelRepository;
 import com.project.airbnb_app.repository.RoomRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +16,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RoomServiceImpl implements RoomService {
 
-    private final HotelRepository hotelRepository;
+    private final HotelService hotelService;
     private final InventoryService inventoryService;
     private final ModelMapper modelMapper;
     private final RoomRepository roomRepository;
@@ -45,7 +44,7 @@ public class RoomServiceImpl implements RoomService {
     @Transactional
     public Boolean deleteRoom(Long hotelId, Long roomId) {
         log.info("Delete room started with the hotel id: {} and room id: {}.", hotelId, roomId);
-        if (!hotelRepository.existsById(hotelId)) {
+        if (!isHotelExist(hotelId)) {
             log.info("Hotel not found with the id: {}", hotelId);
             throw new ResourceNotFoundException("Hotel not found with the id: " + hotelId);
         }
@@ -55,8 +54,8 @@ public class RoomServiceImpl implements RoomService {
                 .orElseThrow(() -> new ResourceNotFoundException("Room not found with the id: " + roomId));
 
         log.info("Hotel and Room exist, continue deleting...");
-        roomRepository.deleteByIdAndHotelId(room.getId(), hotelId);
         inventoryService.deleteInventoryByHotelIdAndRoomId(hotelId, room.getId());
+        roomRepository.deleteByIdAndHotelId(room.getId(), hotelId);
         log.info("Room with the id {}  and related inventories deleted successfully.", roomId);
 
         return true;
@@ -90,11 +89,13 @@ public class RoomServiceImpl implements RoomService {
 
     private Hotel getHotel(Long hotelId) {
         log.info("Get hotel by hotel id: {}.", hotelId);
-        Hotel hotel = hotelRepository
-                .findById(hotelId)
-                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found with the id: " + hotelId));
+        Hotel hotel = hotelService.getHotelById(hotelId);
         log.info("Hotel found with name of {}.", hotel.getName());
-        return hotel;
+        return modelMapper.map(hotel, Hotel.class);
+    }
+
+    private Boolean isHotelExist(Long hotelId) {
+        return hotelService.isHotelExistById(hotelId);
     }
 
     private Room getRoom(Long roomId) {

@@ -35,21 +35,6 @@ public class InventoryServiceImpl implements InventoryService {
     private final ModelMapper modelMapper;
     private final RoomRepository roomRepository;
 
-    private static Inventory buildInventory(Hotel hotel, Room room, LocalDate date) {
-        return Inventory
-                .builder()
-                .hotel(hotel)
-                .room(room)
-                .date(date)
-                .bookedRoomsCount(0)
-                .totalRoomsCount(room.getTotalRoomCount())
-                .surgeFactor(BigDecimal.ONE)
-                .price(BigDecimal.ONE.multiply(room.getBasePrice()))
-                .city(hotel.getCity())
-                .closed(false)
-                .build();
-    }
-
     @Override
     public Page<HotelDto> browseHotels(BrowseHotelRequest browseHotelRequest) {
         log.info("Browse hotel details by city: {}, start date: {} and end date: {} with total {} rooms.",
@@ -74,13 +59,24 @@ public class InventoryServiceImpl implements InventoryService {
         return inventory.map((element) -> modelMapper.map(element, HotelDto.class));
     }
 
+    private static Inventory buildInventory(Hotel hotel, Room room, LocalDate date) {
+        return Inventory
+                .builder()
+                .hotel(hotel)
+                .room(room)
+                .date(date)
+                .bookedRoomsCount(0)
+                .totalRoomsCount(room.getTotalRoomCount())
+                .surgeFactor(BigDecimal.ONE)
+                .price(BigDecimal.ONE.multiply(room.getBasePrice()))
+                .city(hotel.getCity())
+                .closed(false)
+                .build();
+    }
+
     @Override
     public List<InventoryDto> createInventory(Long hotelId, Long roomId) {
-        log.info("Fetch hotel by id {}", hotelId);
-        Hotel hotel = hotelRepository
-                .findById(hotelId)
-                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found with the given id: " + hotelId));
-        log.info("Hotel found with the name: {}", hotel.getName());
+        Hotel hotel = getHotel(hotelId);
 
         log.info("Fetch room by id {}", roomId);
         Room room = roomRepository
@@ -107,7 +103,7 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
-    @Transactional(value = Transactional.TxType.REQUIRES_NEW)
+    @Transactional
     public void deleteInventoryByHotelIdAndRoomId(Long hotelId, Long roomId) {
         log.info("Delete inventory with the hotel id: {} and room id: {}.", hotelId, roomId);
         inventoryRepository.deleteAllByHotelIdAndRoomId(hotelId, roomId);
@@ -116,9 +112,7 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     public HotelInfoDto getHotelDetailsInfo(Long hotelId) {
-        Hotel hotel = hotelRepository
-                .findById(hotelId)
-                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found with the id: " + hotelId));
+        Hotel hotel = getHotel(hotelId);
 
         return HotelInfoDto
                 .builder()
@@ -130,5 +124,14 @@ public class InventoryServiceImpl implements InventoryService {
                         .toList()
                 )
                 .build();
+    }
+
+    private Hotel getHotel(Long hotelId) {
+        log.info("Get hotel by id {}", hotelId);
+        Hotel hotel = hotelRepository
+                .findById(hotelId)
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found with the id: " + hotelId));
+        log.info("Hotel found with the name: {}", hotel.getName());
+        return hotel;
     }
 }

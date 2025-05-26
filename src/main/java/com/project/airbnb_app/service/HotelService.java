@@ -1,6 +1,7 @@
 package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.dto.HotelDto;
+import com.project.airbnb_app.entity.Hotel;
 
 import java.util.List;
 
@@ -14,5 +15,9 @@ public interface HotelService {
 
     List<HotelDto> getAllHotels();
 
-    HotelDto getHotelById(Long hotelId);
+    Hotel getHotelById(Long hotelId);
+
+    HotelDto getHotelDtoById(Long hotelId);
+
+    Boolean isHotelExistById(Long hotelId);
 }

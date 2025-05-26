@@ -49,9 +49,7 @@ public class RoomServiceImpl implements RoomService {
             throw new ResourceNotFoundException("Hotel not found with the id: " + hotelId);
         }
 
-        Room room = roomRepository
-                .findById(roomId)
-                .orElseThrow(() -> new ResourceNotFoundException("Room not found with the id: " + roomId));
+        Room room = getRoomByHotelIdAndRoomId(hotelId, roomId);
 
         log.info("Hotel and Room exist, continue deleting...");
         inventoryService.deleteInventoryByHotelIdAndRoomId(hotelId, room.getId());
@@ -62,11 +60,9 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public RoomDto getRoomByHotelIdAndRoomId(Long hotelId, Long roomId) {
+    public RoomDto getRoomDtoByHotelIdAndRoomId(Long hotelId, Long roomId) {
         log.debug("Get the hotel info by id:  {}", roomId);
-        Room room = roomRepository
-                .findByIdAndHotelId(roomId, hotelId)
-                .orElseThrow(() -> new ResourceNotFoundException("Room not found with the hotel id: " + hotelId + " room id: " + roomId));
+        Room room = getRoomByHotelIdAndRoomId(hotelId, roomId);
         log.info("Room available with the hotel id: {} and room id: {}", hotelId, roomId);
 
         return modelMapper.map(room, RoomDto.class);
@@ -98,11 +94,13 @@ public class RoomServiceImpl implements RoomService {
         return hotelService.isHotelExistById(hotelId);
     }
 
-    private Room getRoom(Long roomId) {
-        log.info("Get room by room id: {}.", roomId);
+    private Room getRoomByHotelIdAndRoomId(Long hotelId, Long roomId) {
+        log.info("Get room by hotel id: {} and room id: {}.", hotelId, roomId);
+
         Room room = roomRepository
-                .findById(roomId)
-                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found with the id: " + roomId));
+                .findByIdAndHotelId(roomId, hotelId)
+                .orElseThrow(() -> new ResourceNotFoundException("Room not found with the hotel id: " + hotelId +
+                        " room id: " + roomId));
         log.info("Room found with the room capacity of {}.", room.getRoomCapacity());
         return room;
     }

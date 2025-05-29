@@ -11,7 +11,7 @@ public interface HotelService {
 
     HotelDto createHotel(HotelDto hotelDto);
 
-    void deleteHotelById(Long hotelId);
+    String deleteHotelById(Long hotelId);
 
     List<HotelDto> getAllHotels();
 

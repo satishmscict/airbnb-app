@@ -94,7 +94,8 @@ public class RoomServiceImpl implements RoomService {
         return hotelService.isHotelExistById(hotelId);
     }
 
-    private Room getRoomByHotelIdAndRoomId(Long hotelId, Long roomId) {
+    @Override
+    public Room getRoomByHotelIdAndRoomId(Long hotelId, Long roomId) {
         log.info("Get room by hotel id: {} and room id: {}.", hotelId, roomId);
 
         Room room = roomRepository

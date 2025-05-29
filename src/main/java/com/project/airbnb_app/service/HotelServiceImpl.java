@@ -55,7 +55,7 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     @Transactional
-    public void deleteHotelById(Long hotelId) {
+    public String deleteHotelById(Long hotelId) {
         log.info("Fetch hotel details with the id: {}.", hotelId);
         Hotel hotel = getHotelById(hotelId);
 
@@ -69,6 +69,8 @@ public class HotelServiceImpl implements HotelService {
         log.info("Child records of inventory deleted. Now delete the hotel entity with the id: {}.", hotelId);
         hotelRepository.deleteById(hotelId);
         log.info("Hotel with id {} deleted successfully.", hotelId);
+
+        return "Hotel id " + hotelId + " successfully deleted.";
     }
 
     @Override

@@ -2,14 +2,16 @@ package com.project.airbnb_app.entity;
 
 import com.project.airbnb_app.entity.enums.Role;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Set;
 
+@Entity
 @Getter
 @Setter
-@Entity
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "app_user")
 public class User extends CreatedAndUpdatedTime {
 

@@ -104,21 +104,21 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
     }
 
     @Override
-    public Page<HotelDto> searchHotels(BrowseHotelRequest browseHotelRequest) {
+    public Page<HotelDto> searchHotels(HotelSearchRequest hotelSearchRequest) {
         log.info("Browse hotel details by city: {}, start date: {} and end date: {} with total {} rooms.",
-                browseHotelRequest.getCity(),
-                browseHotelRequest.getStartDate(),
-                browseHotelRequest.getEndDate(),
-                browseHotelRequest.getRoomsCount()
+                hotelSearchRequest.getCity(),
+                hotelSearchRequest.getStartDate(),
+                hotelSearchRequest.getEndDate(),
+                hotelSearchRequest.getRoomsCount()
         );
-        Pageable pageable = PageRequest.of(browseHotelRequest.getPageNo(), browseHotelRequest.getPageSize());
-        Long daysCount = ChronoUnit.DAYS.between(browseHotelRequest.getStartDate(), browseHotelRequest.getEndDate());
+        Pageable pageable = PageRequest.of(hotelSearchRequest.getPageNo(), hotelSearchRequest.getPageSize());
+        Long daysCount = ChronoUnit.DAYS.between(hotelSearchRequest.getStartDate(), hotelSearchRequest.getEndDate());
 
         Page<Hotel> inventory = roomInventoryRepository.findHotels(
-                browseHotelRequest.getCity(),
-                browseHotelRequest.getStartDate(),
-                browseHotelRequest.getEndDate(),
-                browseHotelRequest.getRoomsCount(),
+                hotelSearchRequest.getCity(),
+                hotelSearchRequest.getStartDate(),
+                hotelSearchRequest.getEndDate(),
+                hotelSearchRequest.getRoomsCount(),
                 daysCount,
                 pageable
         );

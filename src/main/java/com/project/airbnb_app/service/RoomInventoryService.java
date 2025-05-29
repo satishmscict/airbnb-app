@@ -1,8 +1,8 @@
 package com.project.airbnb_app.service;
 
-import com.project.airbnb_app.dto.BrowseHotelRequest;
 import com.project.airbnb_app.dto.HotelDto;
 import com.project.airbnb_app.dto.HotelInfoDto;
+import com.project.airbnb_app.dto.HotelSearchRequest;
 import com.project.airbnb_app.dto.InventoryDto;
 import org.springframework.data.domain.Page;
 
@@ -16,5 +16,5 @@ public interface RoomInventoryService {
 
     HotelInfoDto getHotelDetailsInfo(Long hotelId);
 
-    Page<HotelDto> searchHotels(BrowseHotelRequest browseHotelRequest);
+    Page<HotelDto> searchHotels(HotelSearchRequest hotelSearchRequest);
 }

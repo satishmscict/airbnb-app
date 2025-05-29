@@ -1,9 +1,9 @@
 package com.project.airbnb_app.controller;
 
 import com.project.airbnb_app.advice.ApiResponse;
-import com.project.airbnb_app.dto.BrowseHotelRequest;
 import com.project.airbnb_app.dto.HotelDto;
 import com.project.airbnb_app.dto.HotelInfoDto;
+import com.project.airbnb_app.dto.HotelSearchRequest;
 import com.project.airbnb_app.service.HotelService;
 import com.project.airbnb_app.service.RoomInventoryService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,7 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/admin/hotels")
 @RequiredArgsConstructor
-@Tag(name = "Admin Hotel API")
+@Tag(name = "Hotel API")
 public class HotelController {
 
     private final HotelService hotelService;
@@ -58,8 +58,8 @@ public class HotelController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<HotelDto>> searchHotels(@RequestBody @Valid BrowseHotelRequest browseHotelRequest) {
-        Page<HotelDto> hotelDto = roomInventoryService.searchHotels(browseHotelRequest);
+    public ResponseEntity<Page<HotelDto>> searchHotels(@RequestBody @Valid HotelSearchRequest hotelSearchRequest) {
+        Page<HotelDto> hotelDto = roomInventoryService.searchHotels(hotelSearchRequest);
         return ResponseEntity.ok(hotelDto);
     }
 }

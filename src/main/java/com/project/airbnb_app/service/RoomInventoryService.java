@@ -8,13 +8,13 @@ import org.springframework.data.domain.Page;
 
 import java.util.List;
 
-public interface InventoryService {
-
-    Page<HotelDto> browseHotels(BrowseHotelRequest browseHotelRequest);
+public interface RoomInventoryService {
 
     List<InventoryDto> createInventory(Long hotelId, Long roomId);
 
     void deleteInventoryByHotelIdAndRoomId(Long hotelId, Long roomId);
 
     HotelInfoDto getHotelDetailsInfo(Long hotelId);
+
+    Page<HotelDto> searchHotels(BrowseHotelRequest browseHotelRequest);
 }

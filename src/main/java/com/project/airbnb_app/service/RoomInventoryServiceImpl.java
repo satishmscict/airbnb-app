@@ -6,7 +6,7 @@ import com.project.airbnb_app.entity.Inventory;
 import com.project.airbnb_app.entity.Room;
 import com.project.airbnb_app.exception.ResourceNotFoundException;
 import com.project.airbnb_app.repository.HotelRepository;
-import com.project.airbnb_app.repository.InventoryRepository;
+import com.project.airbnb_app.repository.RoomInventoryRepository;
 import com.project.airbnb_app.repository.RoomRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -26,38 +26,14 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class InventoryServiceImpl implements InventoryService {
+public class RoomInventoryServiceImpl implements RoomInventoryService {
 
     private static final int TOTAL_INVENTORY_YEARS = 1;
 
     private final HotelRepository hotelRepository;
-    private final InventoryRepository inventoryRepository;
     private final ModelMapper modelMapper;
+    private final RoomInventoryRepository roomInventoryRepository;
     private final RoomRepository roomRepository;
-
-    @Override
-    public Page<HotelDto> browseHotels(BrowseHotelRequest browseHotelRequest) {
-        log.info("Browse hotel details by city: {}, start date: {} and end date: {} with total {} rooms.",
-                browseHotelRequest.getCity(),
-                browseHotelRequest.getStartDate(),
-                browseHotelRequest.getEndDate(),
-                browseHotelRequest.getRoomsCount()
-        );
-        Pageable pageable = PageRequest.of(browseHotelRequest.getPageNo(), browseHotelRequest.getPageSize());
-        Long daysCount = ChronoUnit.DAYS.between(browseHotelRequest.getStartDate(), browseHotelRequest.getEndDate());
-
-        Page<Hotel> inventory = inventoryRepository.findHotels(
-                browseHotelRequest.getCity(),
-                browseHotelRequest.getStartDate(),
-                browseHotelRequest.getEndDate(),
-                browseHotelRequest.getRoomsCount(),
-                daysCount,
-                pageable
-        );
-        log.info("Total {} hotels found.", inventory.getContent().size());
-
-        return inventory.map((element) -> modelMapper.map(element, HotelDto.class));
-    }
 
     private static Inventory buildInventory(Hotel hotel, Room room, LocalDate date) {
         return Inventory
@@ -93,7 +69,7 @@ public class InventoryServiceImpl implements InventoryService {
             Inventory inventory = buildInventory(hotel, room, date);
             generateInventory.add(inventory);
         }
-        List<Inventory> inventoryList = inventoryRepository.saveAll(generateInventory);
+        List<Inventory> inventoryList = roomInventoryRepository.saveAll(generateInventory);
         log.info("Successfully generate and save all the inventories, total {} inventories created.", generateInventory.size());
 
         return inventoryList
@@ -106,7 +82,7 @@ public class InventoryServiceImpl implements InventoryService {
     @Transactional
     public void deleteInventoryByHotelIdAndRoomId(Long hotelId, Long roomId) {
         log.info("Delete inventory with the hotel id: {} and room id: {}.", hotelId, roomId);
-        inventoryRepository.deleteAllByHotelIdAndRoomId(hotelId, roomId);
+        roomInventoryRepository.deleteAllByHotelIdAndRoomId(hotelId, roomId);
         log.info("Delete inventory with the hotel id: {} and room id: {} is completed.", hotelId, roomId);
     }
 
@@ -114,16 +90,41 @@ public class InventoryServiceImpl implements InventoryService {
     public HotelInfoDto getHotelDetailsInfo(Long hotelId) {
         Hotel hotel = getHotel(hotelId);
 
+        List<RoomDto> roomDtoList = hotel
+                .getRooms()
+                .stream()
+                .map((element) -> modelMapper.map(element, RoomDto.class))
+                .toList();
+
         return HotelInfoDto
                 .builder()
                 .hotel(modelMapper.map(hotel, HotelDto.class))
-                .rooms(hotel
-                        .getRooms()
-                        .stream()
-                        .map((element) -> modelMapper.map(element, RoomDto.class))
-                        .toList()
-                )
+                .rooms(roomDtoList)
                 .build();
+    }
+
+    @Override
+    public Page<HotelDto> searchHotels(BrowseHotelRequest browseHotelRequest) {
+        log.info("Browse hotel details by city: {}, start date: {} and end date: {} with total {} rooms.",
+                browseHotelRequest.getCity(),
+                browseHotelRequest.getStartDate(),
+                browseHotelRequest.getEndDate(),
+                browseHotelRequest.getRoomsCount()
+        );
+        Pageable pageable = PageRequest.of(browseHotelRequest.getPageNo(), browseHotelRequest.getPageSize());
+        Long daysCount = ChronoUnit.DAYS.between(browseHotelRequest.getStartDate(), browseHotelRequest.getEndDate());
+
+        Page<Hotel> inventory = roomInventoryRepository.findHotels(
+                browseHotelRequest.getCity(),
+                browseHotelRequest.getStartDate(),
+                browseHotelRequest.getEndDate(),
+                browseHotelRequest.getRoomsCount(),
+                daysCount,
+                pageable
+        );
+        log.info("Total {} hotels found.", inventory.getContent().size());
+
+        return inventory.map((element) -> modelMapper.map(element, HotelDto.class));
     }
 
     private Hotel getHotel(Long hotelId) {

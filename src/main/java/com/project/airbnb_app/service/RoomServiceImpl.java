@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 public class RoomServiceImpl implements RoomService {
 
     private final HotelService hotelService;
-    private final InventoryService inventoryService;
+    private final RoomInventoryService roomInventoryService;
     private final ModelMapper modelMapper;
     private final RoomRepository roomRepository;
 
@@ -33,7 +33,7 @@ public class RoomServiceImpl implements RoomService {
 
         log.info("Check hotel active status: {} and generate inventory if hotel already activated.", hotel.getActive());
         if (hotel.getActive()) {
-            inventoryService.createInventory(hotelId, savedRoom.getId());
+            roomInventoryService.createInventory(hotelId, savedRoom.getId());
             log.info("Inventory generated for the room id: {}.", savedRoom.getId());
         }
 
@@ -52,11 +52,23 @@ public class RoomServiceImpl implements RoomService {
         Room room = getRoomByHotelIdAndRoomId(hotelId, roomId);
 
         log.info("Hotel and Room exist, continue deleting...");
-        inventoryService.deleteInventoryByHotelIdAndRoomId(hotelId, room.getId());
+        roomInventoryService.deleteInventoryByHotelIdAndRoomId(hotelId, room.getId());
         roomRepository.deleteByIdAndHotelId(room.getId(), hotelId);
         log.info("Room with the id {}  and related inventories deleted successfully.", roomId);
 
         return true;
+    }
+
+    @Override
+    public Room getRoomByHotelIdAndRoomId(Long hotelId, Long roomId) {
+        log.info("Get room by hotel id: {} and room id: {}.", hotelId, roomId);
+
+        Room room = roomRepository
+                .findByIdAndHotelId(roomId, hotelId)
+                .orElseThrow(() -> new ResourceNotFoundException("Room not found with the hotel id: " + hotelId +
+                        " room id: " + roomId));
+        log.info("Room found with the room capacity of {}.", room.getRoomCapacity());
+        return room;
     }
 
     @Override
@@ -92,17 +104,5 @@ public class RoomServiceImpl implements RoomService {
 
     private Boolean isHotelExist(Long hotelId) {
         return hotelService.isHotelExistById(hotelId);
-    }
-
-    @Override
-    public Room getRoomByHotelIdAndRoomId(Long hotelId, Long roomId) {
-        log.info("Get room by hotel id: {} and room id: {}.", hotelId, roomId);
-
-        Room room = roomRepository
-                .findByIdAndHotelId(roomId, hotelId)
-                .orElseThrow(() -> new ResourceNotFoundException("Room not found with the hotel id: " + hotelId +
-                        " room id: " + roomId));
-        log.info("Room found with the room capacity of {}.", room.getRoomCapacity());
-        return room;
     }
 }

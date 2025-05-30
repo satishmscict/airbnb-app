@@ -15,14 +15,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/hotel-bookings")
-@Tag(name = "Booking Hotel API")
+@RequestMapping("/api/v1/hotelBookings")
+@Tag(name = "Hotel Booking API")
 public class HotelBookingController {
 
     private final HotelBookingService hotelBookingService;
 
     @PostMapping
-    public ResponseEntity<BookingDto> createBooking(@RequestBody @Valid HotelBookingRequest hotelBookingRequest) {
+    public ResponseEntity<BookingDto> createBooking(@Valid @RequestBody HotelBookingRequest hotelBookingRequest) {
         BookingDto bookingDto = hotelBookingService.crateBooking(hotelBookingRequest);
         return new ResponseEntity<>(bookingDto, HttpStatus.CREATED);
     }

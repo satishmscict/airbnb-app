@@ -1,6 +1,7 @@
 package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.dto.BookingDto;
+import com.project.airbnb_app.dto.GuestDto;
 import com.project.airbnb_app.dto.HotelBookingRequest;
 import com.project.airbnb_app.entity.*;
 import com.project.airbnb_app.entity.enums.BookingStatus;
@@ -8,7 +9,6 @@ import com.project.airbnb_app.entity.enums.Role;
 import com.project.airbnb_app.exception.ResourceNotFoundException;
 import com.project.airbnb_app.repository.AppUserRepository;
 import com.project.airbnb_app.repository.HotelBookingRepository;
-import com.project.airbnb_app.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -26,36 +26,27 @@ public class HotelBookingServiceImpl implements HotelBookingService {
     private final HotelBookingRepository hotelBookingRepository;
     private final HotelService hotelService;
     private final ModelMapper modelMapper;
-    private final RoomRepository roomRepository;
+    private final RoomService roomService;
+
+    // TODO: Refactor to use AppUserService and clean up related code.
     private final AppUserRepository appUserRepository;
+    // TODO: Refactor to use GuestService and clean up related code.
     private final GuestRepository guestRepository;
 
     @Override
     public BookingDto crateBooking(HotelBookingRequest hotelBookingRequest) {
         try {
-            log.info("Crete booking request started with {}", hotelBookingRequest.toString());
+            log.info("Create booking request started with {}", hotelBookingRequest.toString());
 
             Hotel hotel = hotelService.getHotelById(hotelBookingRequest.getHotelId());
-            log.info("Hotel found with the id: {}", hotel.getId());
-
-            Room room = roomRepository.
-                    findByIdAndHotelId(hotelBookingRequest.getRoomId(), hotelBookingRequest.getHotelId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Room not found with the hotel id " + hotelBookingRequest.getHotelId() + " and room id " + hotelBookingRequest.getRoomId()));
-            log.info("Room found with the id: {}", room.getId());
-
+            Room room = roomService.getRoomByHotelIdAndRoomId(
+                    hotelBookingRequest.getRoomId(),
+                    hotelBookingRequest.getHotelId()
+            );
             User user = getAppUser();
 
-            Set<Guest> guestSet = hotelBookingRequest
-                    .getGuest()
-                    .stream()
-                    .map((guestDto) -> {
-                        guestDto.setUser(user);
-                        return modelMapper.map(guestDto, Guest.class);
-                    })
-                    .collect(Collectors.toSet());
-
+            Set<Guest> guestSet = getGuestSet(hotelBookingRequest.getGuest(), user);
             guestSet = guestRepository.saveAll(guestSet).stream().collect(Collectors.toSet());
-
             log.info("Guest dto converted into Guest. Total {} guest saved and available.", guestSet.size());
 
             log.info("Booking object preparing....");
@@ -85,7 +76,6 @@ public class HotelBookingServiceImpl implements HotelBookingService {
         Set<Role> roleSet = EnumSet.of(Role.GUEST);
 
         User user = appUserRepository.findById(1L).orElse(null);
-
         if (user == null) {
             user = User
                     .builder()
@@ -97,7 +87,17 @@ public class HotelBookingServiceImpl implements HotelBookingService {
             user = appUserRepository.save(user);
         }
 
-
         return user;
+    }
+
+    private Set<Guest> getGuestSet(Set<GuestDto> guestDtoSet, User user) {
+        return guestDtoSet
+                .stream()
+                .map((guestDto) -> {
+                            guestDto.setUser(user);
+                            return modelMapper.map(guestDto, Guest.class);
+                        }
+                )
+                .collect(Collectors.toSet());
     }
 }

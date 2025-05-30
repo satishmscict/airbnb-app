@@ -25,7 +25,7 @@ public class HotelController {
     private final HotelService hotelService;
     private final RoomInventoryService roomInventoryService;
 
-    @PatchMapping("/{hotelId}")
+    @PatchMapping("/{hotelId}/activate")
     public ResponseEntity<HotelDto> activateHotel(@PathVariable Long hotelId) {
         return ResponseEntity.ok(hotelService.activateHotel(hotelId));
     }

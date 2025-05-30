@@ -15,6 +15,8 @@ public class ModelMapperConfiguration {
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setSkipNullEnabled(true);
 
+        // When a booking is completed, converting the Booking entity to BookingDto fails.
+        // To resolve this issue, the following configuration was added.
         Converter<User, UserDto> userToUserDtoConverter = ctx -> {
             User source = ctx.getSource();
             if (source == null) return null;

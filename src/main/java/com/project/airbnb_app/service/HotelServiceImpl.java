@@ -22,6 +22,7 @@ public class HotelServiceImpl implements HotelService {
     private final HotelRepository hotelRepository;
     private final ModelMapper modelMapper;
     private final RoomInventoryService roomInventoryService;
+    // TODO: Refactor to use RoomService and clean up related code.
     private final RoomRepository roomRepository;
 
     @Override
@@ -91,9 +92,13 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     public Hotel getHotelById(Long hotelId) {
-        return hotelRepository
+        log.info("Find hotel with the id: {}", hotelId);
+        Hotel hotel = hotelRepository
                 .findById(hotelId)
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel not found with the id: " + hotelId));
+        log.info("Hotel found with the id: {}", hotelId);
+
+        return hotel;
     }
 
     @Override

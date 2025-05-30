@@ -30,25 +30,12 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
 
     private static final int TOTAL_INVENTORY_YEARS = 1;
 
+    // TODO: Refactor to use HotelService and clean up related code.
     private final HotelRepository hotelRepository;
     private final ModelMapper modelMapper;
     private final RoomInventoryRepository roomInventoryRepository;
+    // TODO: Refactor to use RoomService and clean up related code.
     private final RoomRepository roomRepository;
-
-    private static Inventory buildInventory(Hotel hotel, Room room, LocalDate date) {
-        return Inventory
-                .builder()
-                .hotel(hotel)
-                .room(room)
-                .date(date)
-                .bookedRoomsCount(0)
-                .totalRoomsCount(room.getTotalRoomCount())
-                .surgeFactor(BigDecimal.ONE)
-                .price(BigDecimal.ONE.multiply(room.getBasePrice()))
-                .city(hotel.getCity())
-                .closed(false)
-                .build();
-    }
 
     @Override
     public List<InventoryDto> createInventory(Long hotelId, Long roomId) {
@@ -125,6 +112,21 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
         log.info("Total {} hotels found.", inventory.getContent().size());
 
         return inventory.map((element) -> modelMapper.map(element, HotelDto.class));
+    }
+
+    private static Inventory buildInventory(Hotel hotel, Room room, LocalDate date) {
+        return Inventory
+                .builder()
+                .hotel(hotel)
+                .room(room)
+                .date(date)
+                .bookedRoomsCount(0)
+                .totalRoomsCount(room.getTotalRoomCount())
+                .surgeFactor(BigDecimal.ONE)
+                .price(BigDecimal.ONE.multiply(room.getBasePrice()))
+                .city(hotel.getCity())
+                .closed(false)
+                .build();
     }
 
     private Hotel getHotel(Long hotelId) {

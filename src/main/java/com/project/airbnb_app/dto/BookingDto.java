@@ -1,17 +1,13 @@
 package com.project.airbnb_app.dto;
 
 import com.project.airbnb_app.entity.enums.BookingStatus;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Set;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class BookingDto {
 
     private Long Id;

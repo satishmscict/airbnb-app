@@ -2,16 +2,14 @@ package com.project.airbnb_app.dto;
 
 import com.project.airbnb_app.entity.enums.Role;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.Set;
 
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Data
 public class UserDto {
 
     private Long id;

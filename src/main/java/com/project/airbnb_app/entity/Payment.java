@@ -28,6 +28,6 @@ public class Payment extends CreatedAndUpdatedTime {
     private PaymentStatus paymentStatus;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "booking_id")
-    private Booking booking;
+    @JoinColumn(name = "hotel_booking_id")
+    private HotelBooking hotelBooking;
 }

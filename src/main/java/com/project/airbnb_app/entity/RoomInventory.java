@@ -13,13 +13,13 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 @AllArgsConstructor
 @Table(
-        name = "inventory",
+        name = "room_inventory",
         uniqueConstraints = @UniqueConstraint(
                 name = "unique_hotel_room_date",
                 columnNames = {"hotel_id", "room_id", "date"}
         )
 )
-public class Inventory extends CreatedAndUpdatedTime {
+public class RoomInventory extends CreatedAndUpdatedTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

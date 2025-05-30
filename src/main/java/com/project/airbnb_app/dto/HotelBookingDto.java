@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @Data
-public class BookingDto {
+public class HotelBookingDto {
 
     private Long Id;
 
@@ -31,7 +31,7 @@ public class BookingDto {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        BookingDto that = (BookingDto) o;
+        HotelBookingDto that = (HotelBookingDto) o;
         return Objects.equals(Id, that.Id) && Objects.equals(roomsCount, that.roomsCount) && Objects.equals(checkInDate, that.checkInDate) && Objects.equals(checkOutDate, that.checkOutDate);
     }
 }

@@ -2,8 +2,8 @@ package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.dto.*;
 import com.project.airbnb_app.entity.Hotel;
-import com.project.airbnb_app.entity.Inventory;
 import com.project.airbnb_app.entity.Room;
+import com.project.airbnb_app.entity.RoomInventory;
 import com.project.airbnb_app.exception.ResourceNotFoundException;
 import com.project.airbnb_app.repository.HotelRepository;
 import com.project.airbnb_app.repository.RoomInventoryRepository;
@@ -37,32 +37,19 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
     // TODO: Refactor to use RoomService and clean up related code.
     private final RoomRepository roomRepository;
 
-    @Override
-    public List<InventoryDto> createInventory(Long hotelId, Long roomId) {
-        Hotel hotel = getHotel(hotelId);
-
-        log.info("Fetch room by id {}", roomId);
-        Room room = roomRepository
-                .findById(roomId)
-                .orElseThrow(() -> new ResourceNotFoundException("Room not found with the id: " + roomId));
-        log.info("Room found with the id: {}", roomId);
-
-        log.info("Generate inventory for next {} days", TOTAL_INVENTORY_YEARS);
-        LocalDate currentDate = LocalDate.now();
-        LocalDate endDate = currentDate.plusYears(TOTAL_INVENTORY_YEARS);
-
-        List<Inventory> generateInventory = new ArrayList<>();
-        for (LocalDate date = currentDate; !date.isEqual(endDate); date = date.plusDays(1)) {
-            Inventory inventory = buildInventory(hotel, room, date);
-            generateInventory.add(inventory);
-        }
-        List<Inventory> inventoryList = roomInventoryRepository.saveAll(generateInventory);
-        log.info("Successfully generate and save all the inventories, total {} inventories created.", generateInventory.size());
-
-        return inventoryList
-                .stream()
-                .map(inventory -> modelMapper.map(inventory, InventoryDto.class))
-                .toList();
+    private static RoomInventory buildInventory(Hotel hotel, Room room, LocalDate date) {
+        return RoomInventory
+                .builder()
+                .hotel(hotel)
+                .room(room)
+                .date(date)
+                .bookedRoomsCount(0)
+                .totalRoomsCount(room.getTotalRoomCount())
+                .surgeFactor(BigDecimal.ONE)
+                .price(BigDecimal.ONE.multiply(room.getBasePrice()))
+                .city(hotel.getCity())
+                .closed(false)
+                .build();
     }
 
     @Override
@@ -114,19 +101,32 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
         return inventory.map((element) -> modelMapper.map(element, HotelDto.class));
     }
 
-    private static Inventory buildInventory(Hotel hotel, Room room, LocalDate date) {
-        return Inventory
-                .builder()
-                .hotel(hotel)
-                .room(room)
-                .date(date)
-                .bookedRoomsCount(0)
-                .totalRoomsCount(room.getTotalRoomCount())
-                .surgeFactor(BigDecimal.ONE)
-                .price(BigDecimal.ONE.multiply(room.getBasePrice()))
-                .city(hotel.getCity())
-                .closed(false)
-                .build();
+    @Override
+    public List<RoomInventoryDto> createInventory(Long hotelId, Long roomId) {
+        Hotel hotel = getHotel(hotelId);
+
+        log.info("Fetch room by id {}", roomId);
+        Room room = roomRepository
+                .findById(roomId)
+                .orElseThrow(() -> new ResourceNotFoundException("Room not found with the id: " + roomId));
+        log.info("Room found with the id: {}", roomId);
+
+        log.info("Generate inventory for next {} days", TOTAL_INVENTORY_YEARS);
+        LocalDate currentDate = LocalDate.now();
+        LocalDate endDate = currentDate.plusYears(TOTAL_INVENTORY_YEARS);
+
+        List<RoomInventory> generateRoomInventory = new ArrayList<>();
+        for (LocalDate date = currentDate; !date.isEqual(endDate); date = date.plusDays(1)) {
+            RoomInventory roomInventory = buildInventory(hotel, room, date);
+            generateRoomInventory.add(roomInventory);
+        }
+        List<RoomInventory> roomInventoryList = roomInventoryRepository.saveAll(generateRoomInventory);
+        log.info("Successfully generate and save all the inventories, total {} inventories created.", generateRoomInventory.size());
+
+        return roomInventoryList
+                .stream()
+                .map(roomInventory -> modelMapper.map(roomInventory, RoomInventoryDto.class))
+                .toList();
     }
 
     private Hotel getHotel(Long hotelId) {

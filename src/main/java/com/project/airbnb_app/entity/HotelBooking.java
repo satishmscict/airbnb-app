@@ -13,8 +13,8 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "booking")
-public class Booking extends CreatedAndUpdatedTime {
+@Table(name = "hotel_booking")
+public class HotelBooking extends CreatedAndUpdatedTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

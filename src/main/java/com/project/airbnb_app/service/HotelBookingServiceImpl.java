@@ -1,7 +1,7 @@
 package com.project.airbnb_app.service;
 
-import com.project.airbnb_app.dto.BookingDto;
 import com.project.airbnb_app.dto.GuestDto;
+import com.project.airbnb_app.dto.HotelBookingDto;
 import com.project.airbnb_app.dto.HotelBookingRequest;
 import com.project.airbnb_app.entity.*;
 import com.project.airbnb_app.entity.enums.BookingStatus;
@@ -34,7 +34,7 @@ public class HotelBookingServiceImpl implements HotelBookingService {
     private final GuestRepository guestRepository;
 
     @Override
-    public BookingDto crateBooking(HotelBookingRequest hotelBookingRequest) {
+    public HotelBookingDto crateBooking(HotelBookingRequest hotelBookingRequest) {
         try {
             log.info("Create booking request started with {}", hotelBookingRequest.toString());
 
@@ -50,7 +50,7 @@ public class HotelBookingServiceImpl implements HotelBookingService {
             log.info("Guest dto converted into Guest. Total {} guest saved and available.", guestSet.size());
 
             log.info("Booking object preparing....");
-            Booking booking = Booking
+            HotelBooking hotelBooking = HotelBooking
                     .builder()
                     .hotel(hotel)
                     .room(room)
@@ -62,11 +62,10 @@ public class HotelBookingServiceImpl implements HotelBookingService {
                     .roomsCount(hotelBookingRequest.getBookedRoomsCount())
                     .build();
 
-            Booking savedBooking = hotelBookingRepository.save(booking);
-            log.info("Booking object prepared and saved with the id : {}", booking.getId());
+            HotelBooking savedHotelBooking = hotelBookingRepository.save(hotelBooking);
+            log.info("Booking object prepared and saved with the id : {}", hotelBooking.getId());
 
-
-            return modelMapper.map(savedBooking, BookingDto.class);
+            return modelMapper.map(savedHotelBooking, HotelBookingDto.class);
         } catch (ResourceNotFoundException e) {
             throw new RuntimeException("Hotel booking failed : " + e.getCause());
         }

@@ -7,9 +7,9 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 
+@Entity
 @Getter
 @Setter
-@Entity
 @Table(name = "payment")
 public class Payment extends CreatedAndUpdatedTime {
 

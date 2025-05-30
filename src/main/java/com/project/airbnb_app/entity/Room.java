@@ -6,9 +6,9 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 
+@Entity
 @Getter
 @Setter
-@Entity
 @Table(name = "room")
 public class Room extends CreatedAndUpdatedTime {
 

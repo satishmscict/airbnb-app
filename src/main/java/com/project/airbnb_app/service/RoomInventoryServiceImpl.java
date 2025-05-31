@@ -1,6 +1,7 @@
 package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.dto.HotelDto;
+import com.project.airbnb_app.dto.request.HotelBookingRequest;
 import com.project.airbnb_app.dto.request.HotelSearchRequest;
 import com.project.airbnb_app.entity.Hotel;
 import com.project.airbnb_app.entity.Room;
@@ -29,6 +30,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RoomInventoryServiceImpl implements RoomInventoryService {
 
+    //private final HotelBookingRepository hotelBookingRepository;
     private static final int TOTAL_INVENTORY_YEARS = 1;
 
     // TODO: Refactor to use HotelService and clean up related code.
@@ -45,6 +47,7 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
                 .room(room)
                 .date(date)
                 .bookedRoomsCount(0)
+                .reservedRoomsCount(0)
                 .totalRoomsCount(room.getTotalRoomCount())
                 .surgeFactor(BigDecimal.ONE)
                 .price(BigDecimal.ONE.multiply(room.getBasePrice()))
@@ -83,6 +86,29 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
         log.info("Total {} hotels found.", inventory.getContent().size());
 
         return inventory.map((element) -> modelMapper.map(element, HotelDto.class));
+    }
+
+    @Transactional
+    @Override
+    public List<RoomInventory> updateReservedRoomsCount(HotelBookingRequest hotelBookingRequest) {
+        List<RoomInventory> roomInventoryList = findAndLockAvailableInventory(hotelBookingRequest);
+
+        for (RoomInventory roomInventory : roomInventoryList) {
+            roomInventory.setReservedRoomsCount(roomInventory.getReservedRoomsCount() + hotelBookingRequest.getBookedRoomsCount());
+        }
+        roomInventoryList = roomInventoryRepository.saveAll(roomInventoryList);
+
+        return roomInventoryList;
+    }
+
+    @Transactional
+    private List<RoomInventory> findAndLockAvailableInventory(HotelBookingRequest hotelBookingRequest) {
+        return roomInventoryRepository.findAndLockAvailableInventory(
+                hotelBookingRequest.getRoomId(),
+                hotelBookingRequest.getCheckInDate().toLocalDate(),
+                hotelBookingRequest.getCheckOutDate().toLocalDate(),
+                hotelBookingRequest.getBookedRoomsCount()
+        );
     }
 
     @Override

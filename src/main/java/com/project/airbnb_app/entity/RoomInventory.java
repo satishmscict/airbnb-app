@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Builder
-@RequiredArgsConstructor
+@NoArgsConstructor
 @AllArgsConstructor
 @Table(
         name = "room_inventory",
@@ -38,6 +38,9 @@ public class RoomInventory extends CreatedAndUpdatedTime {
 
     @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
     private Integer bookedRoomsCount;
+
+    @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
+    private Integer reservedRoomsCount;
 
     @Column(nullable = false)
     private Integer totalRoomsCount;

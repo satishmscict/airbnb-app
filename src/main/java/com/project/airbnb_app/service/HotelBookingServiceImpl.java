@@ -6,60 +6,73 @@ import com.project.airbnb_app.dto.request.HotelBookingRequest;
 import com.project.airbnb_app.entity.*;
 import com.project.airbnb_app.entity.enums.BookingStatus;
 import com.project.airbnb_app.entity.enums.Role;
+import com.project.airbnb_app.exception.ResourceNotFoundException;
 import com.project.airbnb_app.repository.AppUserRepository;
-import com.project.airbnb_app.repository.GuestRepository;
 import com.project.airbnb_app.repository.HotelBookingRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class HotelBookingServiceImpl implements HotelBookingService {
 
-    private final HotelBookingRepository hotelBookingRepository;
-    private final HotelService hotelService;
-    private final ModelMapper modelMapper;
-    private final RoomService roomService;
+    private static final int BOOKING_EXPIRED_MINUTES = 10;
 
     // TODO: Refactor to use AppUserService and clean up related code.
     private final AppUserRepository appUserRepository;
-    // TODO: Refactor to use GuestService and clean up related code.
-    private final GuestRepository guestRepository;
+    private final HotelBookingRepository hotelBookingRepository;
+    private final HotelService hotelService;
+    private final GuestService guestService;
+    private final ModelMapper modelMapper;
+    private final RoomInventoryService roomInventoryService;
+    private final RoomService roomService;
 
+    @Transactional
     @Override
-    public HotelBookingDto crateHotelBooking(HotelBookingRequest hotelBookingRequest) {
+    public HotelBookingDto createHotelBooking(HotelBookingRequest hotelBookingRequest) {
         try {
             log.info("Create booking request started with {}", hotelBookingRequest.toString());
 
-            Hotel hotel = hotelService.getHotelByIdAndIsActive(hotelBookingRequest.getHotelId(), true);
+            //Reserved the rooms
+            long daysCount = ChronoUnit.DAYS.between(hotelBookingRequest.getCheckInDate(), hotelBookingRequest.getCheckOutDate()) + 1;
+            List<RoomInventory> roomInventoryList = roomInventoryService.updateReservedRoomsCount(hotelBookingRequest);
+            if (daysCount != roomInventoryList.size()) {
+                throw new IllegalStateException("Rooms not available for " + daysCount + " days.");
+            }
+
+            Hotel hotel = hotelService.getHotelByIdAndIsActive(
+                    hotelBookingRequest.getHotelId(),
+                    true
+            );
+
             Room room = roomService.getRoomByHotelIdAndRoomId(
                     hotelBookingRequest.getRoomId(),
                     hotelBookingRequest.getHotelId()
             );
+
             User user = getAppUser();
 
-            Set<Guest> guestSet = getGuestSet(hotelBookingRequest.getGuest(), user);
-            guestSet = guestRepository.saveAll(guestSet).stream().collect(Collectors.toSet());
-            log.info("Guest dto converted into Guest. Total {} guest saved and available.", guestSet.size());
-
             log.info("Booking object preparing....");
-            HotelBooking hotelBooking = HotelBooking
-                    .builder()
+            HotelBooking hotelBooking = HotelBooking.builder()
                     .hotel(hotel)
                     .room(room)
                     .user(user)
                     .bookingStatus(BookingStatus.RESERVED)
-                    .guest(guestSet)
                     .checkInDate(hotelBookingRequest.getCheckInDate())
                     .checkOutDate(hotelBookingRequest.getCheckOutDate())
                     .roomsCount(hotelBookingRequest.getBookedRoomsCount())
+                    .amount(BigDecimal.TEN)
                     .build();
 
             HotelBooking savedHotelBooking = hotelBookingRepository.save(hotelBooking);
@@ -69,6 +82,35 @@ public class HotelBookingServiceImpl implements HotelBookingService {
         } catch (Exception e) {
             throw new RuntimeException("Hotel booking failed : " + e.getCause());
         }
+    }
+
+    @Override
+    @Transactional
+    public List<GuestDto> addGuestsToBooking(Long bookingId, List<GuestDto> guestList) {
+        log.info("Adding guest to bookingId {} and total {} guests available.", bookingId, guestList.size());
+
+        HotelBooking hotelBooking = hotelBookingRepository
+                .findById(bookingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel booking not found with the id: " + bookingId));
+
+        if (isBookingExpired(hotelBooking.getCreatedAt())) {
+            throw new IllegalStateException("Hotel booking has expired. Please initiate a new booking.");
+        }
+
+        if (hotelBooking.getBookingStatus() != BookingStatus.RESERVED) {
+            throw new IllegalStateException("Hotel booking status is not RESERVED.");
+        }
+
+        List<GuestDto> guestDtoList = guestService.addGuests(hotelBooking.getUser(), guestList);
+        hotelBooking.setBookingStatus(BookingStatus.GUESTS_ADDED);
+        hotelBookingRepository.save(hotelBooking);
+        log.info("Guests added and update status to GUESTS_ADDED");
+
+        return guestDtoList;
+    }
+
+    private Boolean isBookingExpired(LocalDateTime bookingStartDate) {
+        return bookingStartDate.plusMinutes(BOOKING_EXPIRED_MINUTES).isBefore(LocalDateTime.now());
     }
 
     private User getAppUser() {
@@ -87,16 +129,5 @@ public class HotelBookingServiceImpl implements HotelBookingService {
         }
 
         return user;
-    }
-
-    private Set<Guest> getGuestSet(Set<GuestDto> guestDtoSet, User user) {
-        return guestDtoSet
-                .stream()
-                .map((guestDto) -> {
-                            guestDto.setUser(user);
-                            return modelMapper.map(guestDto, Guest.class);
-                        }
-                )
-                .collect(Collectors.toSet());
     }
 }

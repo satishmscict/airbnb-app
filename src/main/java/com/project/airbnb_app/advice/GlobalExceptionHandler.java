@@ -33,9 +33,12 @@ public class GlobalExceptionHandler {
         return toApiResponseEntity(apiError);
     }
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler({
+            Exception.class,
+            IllegalStateException.class
+    })
     public ResponseEntity<ApiResponse<?>> handleInternalServerError(Exception exception) {
-        log.error("Error cause: {}", exception.getCause().toString());
+        log.error("Error cause: {}", exception.toString());
 
         ApiError apiError = ApiError
                 .builder()

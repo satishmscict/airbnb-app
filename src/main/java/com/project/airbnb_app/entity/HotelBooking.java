@@ -3,7 +3,10 @@ package com.project.airbnb_app.entity;
 import com.project.airbnb_app.entity.enums.BookingStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -35,6 +38,9 @@ public class HotelBooking extends CreatedAndUpdatedTime {
     @Column(nullable = false)
     private Integer roomsCount;
 
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal amount;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private BookingStatus bookingStatus;
@@ -51,5 +57,12 @@ public class HotelBooking extends CreatedAndUpdatedTime {
             inverseJoinColumns = @JoinColumn(name = "guest_id")
     )
     private Set<Guest> guest;
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }
 

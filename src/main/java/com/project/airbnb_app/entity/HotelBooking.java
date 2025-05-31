@@ -2,17 +2,19 @@ package com.project.airbnb_app.entity;
 
 import com.project.airbnb_app.entity.enums.BookingStatus;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.Set;
 
+@Entity
 @Getter
 @Setter
-@Entity
-@Table(name = "booking")
-public class Booking extends CreatedAndUpdatedTime {
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "hotel_booking")
+public class HotelBooking extends CreatedAndUpdatedTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,10 +43,6 @@ public class Booking extends CreatedAndUpdatedTime {
     private LocalDateTime checkInDate;
 
     private LocalDateTime checkOutDate;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "payment_id")
-    private Payment payment;
 
     @ManyToMany
     @JoinTable(

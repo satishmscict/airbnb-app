@@ -1,6 +1,7 @@
 package com.project.airbnb_app.advice;
 
 import com.project.airbnb_app.exception.ResourceNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -33,6 +35,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<?>> handleInternalServerError(Exception exception) {
+        log.error("Error cause: {}", exception.getCause().toString());
+
         ApiError apiError = ApiError
                 .builder()
                 .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)

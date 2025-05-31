@@ -7,9 +7,9 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 
+@Entity
 @Getter
 @Setter
-@Entity
 @Table(name = "payment")
 public class Payment extends CreatedAndUpdatedTime {
 
@@ -26,4 +26,8 @@ public class Payment extends CreatedAndUpdatedTime {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PaymentStatus paymentStatus;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hotel_booking_id")
+    private HotelBooking hotelBooking;
 }

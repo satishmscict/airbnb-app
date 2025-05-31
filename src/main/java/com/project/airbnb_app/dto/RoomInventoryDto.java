@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
-public class InventoryDto {
+public class RoomInventoryDto {
 
     private Long id;
 

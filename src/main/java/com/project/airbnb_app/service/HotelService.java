@@ -2,7 +2,7 @@ package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.dto.HotelDto;
 import com.project.airbnb_app.dto.HotelInfoDto;
-import com.project.airbnb_app.dto.HotelSearchRequest;
+import com.project.airbnb_app.dto.request.HotelSearchRequest;
 import com.project.airbnb_app.entity.Hotel;
 import org.springframework.data.domain.Page;
 
@@ -20,11 +20,11 @@ public interface HotelService {
 
     List<HotelDto> getAllHotels();
 
-    Hotel getHotelById(Long hotelId);
+    Hotel getHotelByIdAndIsActive(Long hotelId, Boolean isActive);
 
     HotelInfoDto getHotelDetailsInfo(Long hotelId);
 
-    HotelDto getHotelDtoById(Long hotelId);
+    HotelDto getHotelDtoByIdAndIsActive(Long hotelId);
 
     Boolean isHotelExistById(Long hotelId);
 }

@@ -23,7 +23,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public RoomDto createRoom(Long hotelId, RoomDto roomDto) {
-        Hotel hotel = getHotel(hotelId);
+        Hotel hotel = hotelService.getHotelByIdAndIsActive(hotelId, true);
 
         log.debug("Convert RoomDto to Room and bind hotel to the room.");
         Room room = modelMapper.map(roomDto, Room.class);
@@ -83,7 +83,7 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public RoomDto updateRoomByHotelIdAndRoomId(Long hotelId, Long roomId, RoomDto roomDto) {
         log.info("Start update room by hotel id: {} and room id: {}.", hotelId, roomId);
-        Hotel hotel = getHotel(hotelId);
+        Hotel hotel = hotelService.getHotelByIdAndIsActive(hotelId, true);
 
         log.debug("Updating RoomDto.");
         roomDto.setId(roomId);
@@ -95,10 +95,10 @@ public class RoomServiceImpl implements RoomService {
         return modelMapper.map(savedRoom, RoomDto.class);
     }
 
-    private Hotel getHotel(Long hotelId) {
-        log.info("Get hotel by hotel id: {}.", hotelId);
-        Hotel hotel = hotelService.getHotelById(hotelId);
-        log.info("Hotel found with name of {}.", hotel.getName());
+    private Hotel getHotelByIdAndIsActive(Long hotelId) {
+        log.info("Get hotel by hotel id {} and isActive : true", hotelId);
+        Hotel hotel = hotelService.getHotelByIdAndIsActive(hotelId, true);
+        log.info("Hotel found with name of {} and isActive : true.", hotel.getName());
         return modelMapper.map(hotel, Hotel.class);
     }
 

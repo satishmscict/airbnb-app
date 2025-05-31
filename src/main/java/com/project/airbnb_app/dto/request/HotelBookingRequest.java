@@ -1,7 +1,9 @@
-package com.project.airbnb_app.dto;
+package com.project.airbnb_app.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.project.airbnb_app.dto.GuestDto;
+import com.project.airbnb_app.dto.UserDto;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 

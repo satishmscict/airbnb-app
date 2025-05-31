@@ -1,8 +1,7 @@
 package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.dto.HotelDto;
-import com.project.airbnb_app.dto.HotelSearchRequest;
-import com.project.airbnb_app.dto.RoomInventoryDto;
+import com.project.airbnb_app.dto.request.HotelSearchRequest;
 import com.project.airbnb_app.entity.Hotel;
 import com.project.airbnb_app.entity.Room;
 import com.project.airbnb_app.entity.RoomInventory;
@@ -63,8 +62,8 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
     }
 
     @Override
-    public Page<HotelDto> searchHotels(HotelSearchRequest hotelSearchRequest) {
-        log.info("Browse hotel details by city: {}, start date: {} and end date: {} with total {} rooms.",
+    public Page<HotelDto> findHotelsByCityAndAvailability(HotelSearchRequest hotelSearchRequest) {
+        log.info("Find hotels by city: {}, start date: {} and end date: {} with total {} rooms.",
                 hotelSearchRequest.getCity(),
                 hotelSearchRequest.getStartDate(),
                 hotelSearchRequest.getEndDate(),
@@ -87,7 +86,7 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
     }
 
     @Override
-    public List<RoomInventoryDto> createInventory(Long hotelId, Long roomId) {
+    public void createInventory(Long hotelId, Long roomId) {
         Hotel hotel = getHotel(hotelId);
 
         log.info("Fetch room by id {}", roomId);
@@ -105,13 +104,9 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
             RoomInventory roomInventory = buildInventory(hotel, room, date);
             generateRoomInventory.add(roomInventory);
         }
-        List<RoomInventory> roomInventoryList = roomInventoryRepository.saveAll(generateRoomInventory);
-        log.info("Successfully generate and save all the inventories, total {} inventories created.", generateRoomInventory.size());
+        roomInventoryRepository.saveAll(generateRoomInventory);
 
-        return roomInventoryList
-                .stream()
-                .map(roomInventory -> modelMapper.map(roomInventory, RoomInventoryDto.class))
-                .toList();
+        log.info("Successfully generate and save all the inventories, total {} inventories created.", generateRoomInventory.size());
     }
 
     private Hotel getHotel(Long hotelId) {

@@ -1,7 +1,7 @@
 package com.project.airbnb_app.controller;
 
 import com.project.airbnb_app.dto.HotelBookingDto;
-import com.project.airbnb_app.dto.HotelBookingRequest;
+import com.project.airbnb_app.dto.request.HotelBookingRequest;
 import com.project.airbnb_app.service.HotelBookingService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -23,7 +23,7 @@ public class HotelBookingController {
 
     @PostMapping
     public ResponseEntity<HotelBookingDto> createBooking(@Valid @RequestBody HotelBookingRequest hotelBookingRequest) {
-        HotelBookingDto hotelBookingDto = hotelBookingService.crateBooking(hotelBookingRequest);
+        HotelBookingDto hotelBookingDto = hotelBookingService.crateHotelBooking(hotelBookingRequest);
         return new ResponseEntity<>(hotelBookingDto, HttpStatus.CREATED);
     }
 }

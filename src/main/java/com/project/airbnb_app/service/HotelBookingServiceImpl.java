@@ -2,12 +2,13 @@ package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.dto.GuestDto;
 import com.project.airbnb_app.dto.HotelBookingDto;
-import com.project.airbnb_app.dto.HotelBookingRequest;
+import com.project.airbnb_app.dto.request.HotelBookingRequest;
 import com.project.airbnb_app.entity.*;
 import com.project.airbnb_app.entity.enums.BookingStatus;
 import com.project.airbnb_app.entity.enums.Role;
 import com.project.airbnb_app.exception.ResourceNotFoundException;
 import com.project.airbnb_app.repository.AppUserRepository;
+import com.project.airbnb_app.repository.GuestRepository;
 import com.project.airbnb_app.repository.HotelBookingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,11 +35,11 @@ public class HotelBookingServiceImpl implements HotelBookingService {
     private final GuestRepository guestRepository;
 
     @Override
-    public HotelBookingDto crateBooking(HotelBookingRequest hotelBookingRequest) {
+    public HotelBookingDto crateHotelBooking(HotelBookingRequest hotelBookingRequest) {
         try {
             log.info("Create booking request started with {}", hotelBookingRequest.toString());
 
-            Hotel hotel = hotelService.getHotelById(hotelBookingRequest.getHotelId());
+            Hotel hotel = hotelService.getHotelByIdAndIsActive(hotelBookingRequest.getHotelId(), true);
             Room room = roomService.getRoomByHotelIdAndRoomId(
                     hotelBookingRequest.getRoomId(),
                     hotelBookingRequest.getHotelId()

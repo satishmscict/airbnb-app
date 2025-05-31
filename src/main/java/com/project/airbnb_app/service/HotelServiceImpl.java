@@ -2,8 +2,8 @@ package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.dto.HotelDto;
 import com.project.airbnb_app.dto.HotelInfoDto;
-import com.project.airbnb_app.dto.HotelSearchRequest;
 import com.project.airbnb_app.dto.RoomDto;
+import com.project.airbnb_app.dto.request.HotelSearchRequest;
 import com.project.airbnb_app.entity.Hotel;
 import com.project.airbnb_app.entity.Room;
 import com.project.airbnb_app.exception.ResourceNotFoundException;
@@ -35,13 +35,13 @@ public class HotelServiceImpl implements HotelService {
         Hotel hotel = getHotelById(hotelId);
         hotel.setActive(true);
         Hotel savedHotel = hotelRepository.save(hotel);
-        log.info("Hotel activated successfully.");
+        log.info("Hotel with id {} activated successfully.", hotelId);
 
-        log.info("Create inventory for each room.");
+        log.info("Create Inventory for Each Room.");
         for (Room room : hotel.getRooms()) {
             roomInventoryService.createInventory(hotelId, room.getId());
         }
-        log.info("Create inventory for each room is successfully completed.");
+        log.info("Inventory creation for each room has been successfully completed.");
 
         return modelMapper.map(savedHotel, HotelDto.class);
     }
@@ -80,14 +80,7 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     public Page<HotelDto> findHotelsByCityAndAvailability(HotelSearchRequest hotelSearchRequest) {
-        log.info("Find hotels by city: {}, start date: {} and end date: {} with total {} rooms.",
-                hotelSearchRequest.getCity(),
-                hotelSearchRequest.getStartDate(),
-                hotelSearchRequest.getEndDate(),
-                hotelSearchRequest.getRoomsCount()
-        );
-
-        return roomInventoryService.searchHotels(hotelSearchRequest);
+        return roomInventoryService.findHotelsByCityAndAvailability(hotelSearchRequest);
     }
 
     @Override
@@ -107,11 +100,15 @@ public class HotelServiceImpl implements HotelService {
     }
 
     @Override
-    public Hotel getHotelById(Long hotelId) {
+    public Hotel getHotelByIdAndIsActive(Long hotelId, Boolean isActive) {
         log.info("Find hotel with the id: {}", hotelId);
+        if (!isHotelExistById(hotelId)) {
+            throw new ResourceNotFoundException("Hotel not found with the id : " + hotelId);
+        }
+
         Hotel hotel = hotelRepository
-                .findById(hotelId)
-                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found with the id: " + hotelId));
+                .findByIdAndActive(hotelId, isActive)
+                .orElseThrow(() -> new ResourceNotFoundException("The hotel exists but is not activated."));
         log.info("Hotel found with the id: {}", hotelId);
 
         return hotel;
@@ -119,7 +116,7 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     public HotelInfoDto getHotelDetailsInfo(Long hotelId) {
-        Hotel hotel = getHotelById(hotelId);
+        Hotel hotel = getHotelByIdAndIsActive(hotelId, true);
 
         List<RoomDto> roomDtoList = hotel
                 .getRooms()
@@ -135,9 +132,9 @@ public class HotelServiceImpl implements HotelService {
     }
 
     @Override
-    public HotelDto getHotelDtoById(Long hotelId) {
+    public HotelDto getHotelDtoByIdAndIsActive(Long hotelId) {
         log.info("Get hotel with the id {}.", hotelId);
-        Hotel toHotel = getHotelById(hotelId);
+        Hotel toHotel = getHotelByIdAndIsActive(hotelId, true);
         log.info("Hotel found with the id {} and name {}.", hotelId, toHotel.getName());
 
         return modelMapper.map(toHotel, HotelDto.class);
@@ -146,5 +143,11 @@ public class HotelServiceImpl implements HotelService {
     @Override
     public Boolean isHotelExistById(Long hotelId) {
         return hotelRepository.existsById(hotelId);
+    }
+
+    private Hotel getHotelById(Long hotelId) {
+        return hotelRepository
+                .findById(hotelId)
+                .orElseThrow(() -> new ResourceNotFoundException("The hotel not found with the id:  " + hotelId));
     }
 }

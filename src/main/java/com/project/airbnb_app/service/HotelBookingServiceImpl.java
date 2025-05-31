@@ -6,7 +6,6 @@ import com.project.airbnb_app.dto.request.HotelBookingRequest;
 import com.project.airbnb_app.entity.*;
 import com.project.airbnb_app.entity.enums.BookingStatus;
 import com.project.airbnb_app.entity.enums.Role;
-import com.project.airbnb_app.exception.ResourceNotFoundException;
 import com.project.airbnb_app.repository.AppUserRepository;
 import com.project.airbnb_app.repository.GuestRepository;
 import com.project.airbnb_app.repository.HotelBookingRepository;
@@ -64,10 +63,10 @@ public class HotelBookingServiceImpl implements HotelBookingService {
                     .build();
 
             HotelBooking savedHotelBooking = hotelBookingRepository.save(hotelBooking);
-            log.info("Booking object prepared and saved with the id : {}", hotelBooking.getId());
+            log.info("Hotel booking object prepared and saved with the id : {}", savedHotelBooking.getId());
 
             return modelMapper.map(savedHotelBooking, HotelBookingDto.class);
-        } catch (ResourceNotFoundException e) {
+        } catch (Exception e) {
             throw new RuntimeException("Hotel booking failed : " + e.getCause());
         }
     }

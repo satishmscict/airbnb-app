@@ -1,8 +1,8 @@
 package com.project.airbnb_app.controller;
 
 import com.project.airbnb_app.advice.ApiResponse;
+import com.project.airbnb_app.dto.HotelAndRoomsDto;
 import com.project.airbnb_app.dto.HotelDto;
-import com.project.airbnb_app.dto.HotelInfoDto;
 import com.project.airbnb_app.dto.request.HotelSearchRequest;
 import com.project.airbnb_app.service.HotelService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -50,9 +50,9 @@ public class HotelController {
         return ResponseEntity.ok(hotelService.getHotelDtoByIdAndIsActive(hotelId));
     }
 
-    @GetMapping("/{hotelId}/getHotelWithRoomDetails")
-    public ResponseEntity<HotelInfoDto> getHotelWithRoomDetails(@PathVariable Long hotelId) {
-        return ResponseEntity.ok(hotelService.getHotelDetailsInfo(hotelId));
+    @GetMapping("/{hotelId}/getHotelAndRooms")
+    public ResponseEntity<HotelAndRoomsDto> getHotelAndRoomsDetails(@PathVariable Long hotelId) {
+        return ResponseEntity.ok(hotelService.getHotelAndRoomsDetails(hotelId));
     }
 
     @GetMapping("/search")

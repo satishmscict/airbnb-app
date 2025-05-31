@@ -1,7 +1,7 @@
 package com.project.airbnb_app.service;
 
+import com.project.airbnb_app.dto.HotelAndRoomsDto;
 import com.project.airbnb_app.dto.HotelDto;
-import com.project.airbnb_app.dto.HotelInfoDto;
 import com.project.airbnb_app.dto.RoomDto;
 import com.project.airbnb_app.dto.request.HotelSearchRequest;
 import com.project.airbnb_app.entity.Hotel;
@@ -115,7 +115,7 @@ public class HotelServiceImpl implements HotelService {
     }
 
     @Override
-    public HotelInfoDto getHotelDetailsInfo(Long hotelId) {
+    public HotelAndRoomsDto getHotelAndRoomsDetails(Long hotelId) {
         Hotel hotel = getHotelByIdAndIsActive(hotelId, true);
 
         List<RoomDto> roomDtoList = hotel
@@ -124,7 +124,7 @@ public class HotelServiceImpl implements HotelService {
                 .map((element) -> modelMapper.map(element, RoomDto.class))
                 .toList();
 
-        return HotelInfoDto
+        return HotelAndRoomsDto
                 .builder()
                 .hotel(modelMapper.map(hotel, HotelDto.class))
                 .rooms(roomDtoList)

@@ -17,15 +17,15 @@ public interface RoomInventoryRepository extends JpaRepository<RoomInventory, Lo
     void deleteAllByHotelIdAndRoomId(Long hotelId, Long roomId);
 
     @Query("""
-            SELECT DISTINCT i.hotel
-            FROM RoomInventory i
+            SELECT DISTINCT ri.hotel
+            FROM RoomInventory ri
             WHERE
-                i.city = :city
-                AND i.date between :startDate AND :endDate
-                AND (i.totalRoomsCount - i.bookedRoomsCount) >= :roomsCount
-                AND i.closed = false
-            Group by i.hotel, i.room
-            HAVING COUNT(i.date) >= :daysCount
+                ri.city = :city
+                AND ri.date between :startDate AND :endDate
+                AND (ri.totalRoomsCount - ri.bookedRoomsCount) >= :roomsCount
+                AND ri.closed = false
+            Group by ri.hotel, ri.room
+            HAVING COUNT(ri.date) >= :daysCount
             """
     )
     Page<Hotel> findHotelsByCityAndAvailability(

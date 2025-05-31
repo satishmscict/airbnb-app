@@ -55,8 +55,8 @@ public class HotelController {
         return ResponseEntity.ok(hotelService.getHotelAndRoomsDetails(hotelId));
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<Page<HotelDto>> searchHotels(@RequestBody @Valid HotelSearchRequest hotelSearchRequest) {
+    @PostMapping("/search")
+    public ResponseEntity<Page<HotelDto>> searchHotels(@Valid @RequestBody HotelSearchRequest hotelSearchRequest) {
         Page<HotelDto> hotelDto = hotelService.findHotelsByCityAndAvailability(hotelSearchRequest);
         return ResponseEntity.ok(hotelDto);
     }

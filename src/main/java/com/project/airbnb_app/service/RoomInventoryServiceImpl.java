@@ -1,6 +1,8 @@
 package com.project.airbnb_app.service;
 
-import com.project.airbnb_app.dto.*;
+import com.project.airbnb_app.dto.HotelDto;
+import com.project.airbnb_app.dto.HotelSearchRequest;
+import com.project.airbnb_app.dto.RoomInventoryDto;
 import com.project.airbnb_app.entity.Hotel;
 import com.project.airbnb_app.entity.Room;
 import com.project.airbnb_app.entity.RoomInventory;
@@ -61,23 +63,6 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
     }
 
     @Override
-    public HotelInfoDto getHotelDetailsInfo(Long hotelId) {
-        Hotel hotel = getHotel(hotelId);
-
-        List<RoomDto> roomDtoList = hotel
-                .getRooms()
-                .stream()
-                .map((element) -> modelMapper.map(element, RoomDto.class))
-                .toList();
-
-        return HotelInfoDto
-                .builder()
-                .hotel(modelMapper.map(hotel, HotelDto.class))
-                .rooms(roomDtoList)
-                .build();
-    }
-
-    @Override
     public Page<HotelDto> searchHotels(HotelSearchRequest hotelSearchRequest) {
         log.info("Browse hotel details by city: {}, start date: {} and end date: {} with total {} rooms.",
                 hotelSearchRequest.getCity(),
@@ -88,7 +73,7 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
         Pageable pageable = PageRequest.of(hotelSearchRequest.getPageNo(), hotelSearchRequest.getPageSize());
         Long daysCount = ChronoUnit.DAYS.between(hotelSearchRequest.getStartDate(), hotelSearchRequest.getEndDate());
 
-        Page<Hotel> inventory = roomInventoryRepository.findHotels(
+        Page<Hotel> inventory = roomInventoryRepository.findHotelsByCityAndAvailability(
                 hotelSearchRequest.getCity(),
                 hotelSearchRequest.getStartDate(),
                 hotelSearchRequest.getEndDate(),

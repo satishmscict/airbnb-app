@@ -28,7 +28,7 @@ public interface RoomInventoryRepository extends JpaRepository<RoomInventory, Lo
             HAVING COUNT(i.date) >= :daysCount
             """
     )
-    Page<Hotel> findHotels(
+    Page<Hotel> findHotelsByCityAndAvailability(
             @Param("city") String city,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,

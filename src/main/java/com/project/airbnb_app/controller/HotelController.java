@@ -5,7 +5,6 @@ import com.project.airbnb_app.dto.HotelDto;
 import com.project.airbnb_app.dto.HotelInfoDto;
 import com.project.airbnb_app.dto.HotelSearchRequest;
 import com.project.airbnb_app.service.HotelService;
-import com.project.airbnb_app.service.RoomInventoryService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +22,6 @@ import java.util.List;
 public class HotelController {
 
     private final HotelService hotelService;
-    private final RoomInventoryService roomInventoryService;
 
     @PatchMapping("/{hotelId}/activate")
     public ResponseEntity<HotelDto> activateHotel(@PathVariable Long hotelId) {
@@ -54,12 +52,12 @@ public class HotelController {
 
     @GetMapping("/{hotelId}/getHotelDetails")
     public ResponseEntity<HotelInfoDto> getHotelDetailsInfo(@PathVariable Long hotelId) {
-        return ResponseEntity.ok(roomInventoryService.getHotelDetailsInfo(hotelId));
+        return ResponseEntity.ok(hotelService.getHotelDetailsInfo(hotelId));
     }
 
     @GetMapping("/search")
     public ResponseEntity<Page<HotelDto>> searchHotels(@RequestBody @Valid HotelSearchRequest hotelSearchRequest) {
-        Page<HotelDto> hotelDto = roomInventoryService.searchHotels(hotelSearchRequest);
+        Page<HotelDto> hotelDto = hotelService.findHotelsByCityAndAvailability(hotelSearchRequest);
         return ResponseEntity.ok(hotelDto);
     }
 }

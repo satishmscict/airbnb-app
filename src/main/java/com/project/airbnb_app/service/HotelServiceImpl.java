@@ -1,6 +1,9 @@
 package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.dto.HotelDto;
+import com.project.airbnb_app.dto.HotelInfoDto;
+import com.project.airbnb_app.dto.HotelSearchRequest;
+import com.project.airbnb_app.dto.RoomDto;
 import com.project.airbnb_app.entity.Hotel;
 import com.project.airbnb_app.entity.Room;
 import com.project.airbnb_app.exception.ResourceNotFoundException;
@@ -10,6 +13,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -75,6 +79,18 @@ public class HotelServiceImpl implements HotelService {
     }
 
     @Override
+    public Page<HotelDto> findHotelsByCityAndAvailability(HotelSearchRequest hotelSearchRequest) {
+        log.info("Find hotels by city: {}, start date: {} and end date: {} with total {} rooms.",
+                hotelSearchRequest.getCity(),
+                hotelSearchRequest.getStartDate(),
+                hotelSearchRequest.getEndDate(),
+                hotelSearchRequest.getRoomsCount()
+        );
+
+        return roomInventoryService.searchHotels(hotelSearchRequest);
+    }
+
+    @Override
     public List<HotelDto> getAllHotels() {
         log.info("Getting all hotels preparing.");
 
@@ -99,6 +115,23 @@ public class HotelServiceImpl implements HotelService {
         log.info("Hotel found with the id: {}", hotelId);
 
         return hotel;
+    }
+
+    @Override
+    public HotelInfoDto getHotelDetailsInfo(Long hotelId) {
+        Hotel hotel = getHotelById(hotelId);
+
+        List<RoomDto> roomDtoList = hotel
+                .getRooms()
+                .stream()
+                .map((element) -> modelMapper.map(element, RoomDto.class))
+                .toList();
+
+        return HotelInfoDto
+                .builder()
+                .hotel(modelMapper.map(hotel, HotelDto.class))
+                .rooms(roomDtoList)
+                .build();
     }
 
     @Override

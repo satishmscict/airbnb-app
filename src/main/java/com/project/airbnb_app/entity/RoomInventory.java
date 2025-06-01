@@ -2,28 +2,34 @@ package com.project.airbnb_app.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
+@Entity
 @Getter
 @Setter
-@Entity
 @Builder
-@RequiredArgsConstructor
+@NoArgsConstructor
 @AllArgsConstructor
 @Table(
-        name = "inventory",
+        name = "room_inventory",
         uniqueConstraints = @UniqueConstraint(
                 name = "unique_hotel_room_date",
                 columnNames = {"hotel_id", "room_id", "date"}
         )
 )
-public class Inventory extends CreatedAndUpdatedTime {
+public class RoomInventory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
+
+    @Version
+    private Long version;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hotel_id", nullable = false)
@@ -39,6 +45,9 @@ public class Inventory extends CreatedAndUpdatedTime {
     @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
     private Integer bookedRoomsCount;
 
+    @Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
+    private Integer reservedRoomsCount;
+
     @Column(nullable = false)
     private Integer totalRoomsCount;
 
@@ -53,4 +62,11 @@ public class Inventory extends CreatedAndUpdatedTime {
 
     @Column(nullable = false)
     private Boolean closed;
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }

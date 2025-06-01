@@ -3,14 +3,17 @@ package com.project.airbnb_app.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Getter
 @Setter
 @Table(name = "hotel")
-public class Hotel extends CreatedAndUpdatedTime {
+public class Hotel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,4 +44,11 @@ public class Hotel extends CreatedAndUpdatedTime {
     @OneToOne
     @JoinColumn(name = "owner_id")
     private User owner;
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }

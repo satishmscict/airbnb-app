@@ -5,9 +5,7 @@ import com.project.airbnb_app.dto.HotelBookingDto;
 import com.project.airbnb_app.dto.request.HotelBookingRequest;
 import com.project.airbnb_app.entity.*;
 import com.project.airbnb_app.entity.enums.BookingStatus;
-import com.project.airbnb_app.entity.enums.Role;
 import com.project.airbnb_app.exception.ResourceNotFoundException;
-import com.project.airbnb_app.repository.AppUserRepository;
 import com.project.airbnb_app.repository.HotelBookingRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +16,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -29,8 +25,7 @@ public class HotelBookingServiceImpl implements HotelBookingService {
 
     private static final int BOOKING_EXPIRED_MINUTES = 10;
 
-    // TODO: Refactor to use AppUserService and clean up related code.
-    private final AppUserRepository appUserRepository;
+    private final AppUserDomainService appUserDomainService;
     private final HotelBookingRepository hotelBookingRepository;
     private final HotelDomainService hotelDomainService;
     private final GuestService guestService;
@@ -91,7 +86,7 @@ public class HotelBookingServiceImpl implements HotelBookingService {
                 hotelBookingRequest.getHotelId()
         );
 
-        User user = getAppUser();
+        User user = appUserDomainService.getAppUser();
 
         log.debug("Booking object preparing....");
         HotelBooking hotelBooking = HotelBooking.builder()
@@ -111,23 +106,23 @@ public class HotelBookingServiceImpl implements HotelBookingService {
         return modelMapper.map(savedHotelBooking, HotelBookingDto.class);
     }
 
-    private User getAppUser() {
-        Set<Role> roleSet = EnumSet.of(Role.GUEST);
-
-        User user = appUserRepository.findById(1L).orElse(null);
-        if (user == null) {
-            user = User
-                    .builder()
-                    .email("satish@gmail.com")
-                    .name("Satish")
-                    .roles(roleSet)
-                    .password("sa@1234")
-                    .build();
-            user = appUserRepository.save(user);
-        }
-
-        return user;
-    }
+//    private User getAppUser() {
+//        Set<Role> roleSet = EnumSet.of(Role.GUEST);
+//
+//        User user = appUserRepository.findById(1L).orElse(null);
+//        if (user == null) {
+//            user = User
+//                    .builder()
+//                    .email("satish@gmail.com")
+//                    .name("Satish")
+//                    .roles(roleSet)
+//                    .password("sa@1234")
+//                    .build();
+//            user = appUserRepository.save(user);
+//        }
+//
+//        return user;
+//    }
 
     private Boolean isBookingExpired(LocalDateTime bookingStartDate) {
         return bookingStartDate.plusMinutes(BOOKING_EXPIRED_MINUTES).isBefore(LocalDateTime.now());

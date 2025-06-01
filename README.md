@@ -1,7 +1,7 @@
 ### 📘 **Project**
 
-**Airbnb Hotel Booking System** — Provides API implementation to manage Hotels, Rooms, Hotel booking, User creation,
-Guest creation.
+**Airbnb Hotel Booking System** — This project provides API implementations for managing hotels, rooms, bookings, user
+creation, and guest management. The API is developed following clean code practices and SOLID principles.
 
 * **Java Version**: 21
 * **MySql Version**: 9.3.0 for macos15.2 on arm64 (Homebrew)

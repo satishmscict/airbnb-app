@@ -2,9 +2,12 @@ package com.project.airbnb_app.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -19,7 +22,7 @@ import java.time.LocalDate;
                 columnNames = {"hotel_id", "room_id", "date"}
         )
 )
-public class RoomInventory extends CreatedAndUpdatedTime {
+public class RoomInventory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -59,4 +62,11 @@ public class RoomInventory extends CreatedAndUpdatedTime {
 
     @Column(nullable = false)
     private Boolean closed;
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }

@@ -31,7 +31,9 @@ public class HotelBookingController {
                 hotelBookingService.addGuestsToBooking(
                         guestCreate.getBookingId(),
                         guestCreate.getGuest()
-                ), HttpStatus.CREATED);
+                ),
+                HttpStatus.CREATED
+        );
     }
 
     @PostMapping

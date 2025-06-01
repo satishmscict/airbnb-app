@@ -17,7 +17,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "hotel_booking")
-public class HotelBooking extends CreatedAndUpdatedTime {
+public class HotelBooking {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

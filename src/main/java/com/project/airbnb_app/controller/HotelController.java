@@ -49,7 +49,7 @@ public class HotelController {
 
     @GetMapping("/{hotelId}")
     public ResponseEntity<HotelDto> getHotelById(@PathVariable Long hotelId) {
-        return ResponseEntity.ok(hotelService.getHotelDtoByIdAndIsActive(hotelId));
+        return ResponseEntity.ok(hotelService.getHotelByIdAndIsActive(hotelId));
     }
 
     @GetMapping("/{hotelId}/rooms")

@@ -20,6 +20,22 @@ public interface RoomInventoryRepository extends JpaRepository<RoomInventory, Lo
     void deleteAllByHotelIdAndRoomId(Long hotelId, Long roomId);
 
     @Query("""
+            SELECT ri
+            FROM RoomInventory ri
+            WHERE ri.room.id = :roomId
+               AND ri.date between :startDate and :endDate
+               AND ri.closed = false
+               AND (ri.totalRoomsCount - ri.bookedRoomsCount - ri.reservedRoomsCount) >= :roomsCount
+            """)
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<RoomInventory> findAndLockAvailableInventory(
+            @Param("roomId") Long roomId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("roomsCount") Integer roomsCount
+    );
+
+    @Query("""
             SELECT DISTINCT ri.hotel
             FROM RoomInventory ri
             WHERE ri.city = :city
@@ -37,22 +53,5 @@ public interface RoomInventoryRepository extends JpaRepository<RoomInventory, Lo
             @Param("roomsCount") Integer roomsCount,
             @Param("daysCount") Long daysCount,
             Pageable pageable
-    );
-
-
-    @Query("""
-            SELECT ri
-            FROM RoomInventory ri
-            WHERE ri.room.id = :roomId
-               AND ri.date between :startDate and :endDate
-               AND ri.closed = false
-               AND (ri.totalRoomsCount - ri.bookedRoomsCount - ri.reservedRoomsCount) >= :roomsCount
-            """)
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    List<RoomInventory> findAndLockAvailableInventory(
-            @Param("roomId") Long roomId,
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate,
-            @Param("roomsCount") Integer roomsCount
     );
 }

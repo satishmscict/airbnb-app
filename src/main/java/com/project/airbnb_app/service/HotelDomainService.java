@@ -25,14 +25,14 @@ public class HotelDomainService {
         return hotel;
     }
 
-    Hotel getHotelByIdAndIsActive(Long hotelId, Boolean isActive) {
-        log.debug("Find hotel with the id: {} and isActive: {}", hotelId, isActive);
+    Hotel getHotelByIdAndIsActivated(Long hotelId) {
+        log.debug("Find hotel with the id: {} and isActive: {}", hotelId, true);
         if (!isHotelExistById(hotelId)) {
             throw new ResourceNotFoundException("Hotel not found with the id : " + hotelId);
         }
 
         Hotel hotel = hotelRepository
-                .findByIdAndActive(hotelId, isActive)
+                .findByIdAndActive(hotelId, true)
                 .orElseThrow(() -> new ResourceNotFoundException("The hotel exists but is not activated."));
         log.debug("Hotel found with the id: {}", hotelId);
 

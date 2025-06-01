@@ -4,7 +4,6 @@ import com.project.airbnb_app.dto.GuestDto;
 import com.project.airbnb_app.entity.Guest;
 import com.project.airbnb_app.entity.User;
 import com.project.airbnb_app.repository.GuestRepository;
-import com.project.airbnb_app.repository.HotelBookingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -19,8 +18,6 @@ public class GuestServiceImpl implements GuestService {
 
     private final GuestRepository guestRepository;
     private final ModelMapper modelMapper;
-
-    private final HotelBookingRepository hotelBookingRepository;
 
     @Override
     public List<GuestDto> addGuests(User user, List<GuestDto> guestDtoList) {

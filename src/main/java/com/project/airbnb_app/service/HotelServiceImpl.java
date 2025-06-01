@@ -51,7 +51,7 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     public HotelAndRoomsDto getHotelAndRoomsDetails(Long hotelId) {
-        Hotel hotel = hotelDomainService.getHotelByIdAndIsActive(hotelId, true);
+        Hotel hotel = hotelDomainService.getHotelByIdAndIsActivated(hotelId);
 
         List<RoomDto> roomDtoList = hotel
                 .getRooms()
@@ -67,9 +67,9 @@ public class HotelServiceImpl implements HotelService {
     }
 
     @Override
-    public HotelDto getHotelDtoByIdAndIsActive(Long hotelId) {
+    public HotelDto getHotelByIdAndIsActive(Long hotelId) {
         log.debug("Get hotel with the id {}.", hotelId);
-        Hotel toHotel = hotelDomainService.getHotelByIdAndIsActive(hotelId, true);
+        Hotel toHotel = hotelDomainService.getHotelByIdAndIsActivated(hotelId);
         log.debug("Hotel found with the id {} and name {}.", hotelId, toHotel.getName());
 
         return modelMapper.map(toHotel, HotelDto.class);

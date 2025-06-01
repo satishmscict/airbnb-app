@@ -72,6 +72,45 @@ public class HotelBookingServiceImpl implements HotelBookingService {
         return guestDtoList;
     }
 
+    @Transactional
+    @Override
+    public HotelBookingDto createHotelBooking(HotelBookingRequest hotelBookingRequest) {
+        log.debug("Create booking request started with {}", hotelBookingRequest.toString());
+
+        //Reserved the rooms
+        long daysCount = ChronoUnit.DAYS.between(hotelBookingRequest.getCheckInDate(), hotelBookingRequest.getCheckOutDate()) + 1;
+        List<RoomInventory> roomInventoryList = roomInventoryService.updateReservedRoomsCount(hotelBookingRequest);
+        if (daysCount != roomInventoryList.size()) {
+            throw new IllegalStateException("Rooms not available for " + daysCount + " days.");
+        }
+
+        Hotel hotel = hotelDomainService.getHotelByIdAndIsActivated(hotelBookingRequest.getHotelId());
+
+        Room room = roomDomainService.getRoomById(
+                hotelBookingRequest.getRoomId(),
+                hotelBookingRequest.getHotelId()
+        );
+
+        User user = getAppUser();
+
+        log.debug("Booking object preparing....");
+        HotelBooking hotelBooking = HotelBooking.builder()
+                .hotel(hotel)
+                .room(room)
+                .user(user)
+                .bookingStatus(BookingStatus.RESERVED)
+                .checkInDate(hotelBookingRequest.getCheckInDate())
+                .checkOutDate(hotelBookingRequest.getCheckOutDate())
+                .roomsCount(hotelBookingRequest.getBookedRoomsCount())
+                .amount(BigDecimal.TEN)
+                .build();
+
+        HotelBooking savedHotelBooking = hotelBookingRepository.save(hotelBooking);
+        log.debug("Hotel booking object prepared and saved with the id : {}", savedHotelBooking.getId());
+
+        return modelMapper.map(savedHotelBooking, HotelBookingDto.class);
+    }
+
     private User getAppUser() {
         Set<Role> roleSet = EnumSet.of(Role.GUEST);
 
@@ -88,48 +127,6 @@ public class HotelBookingServiceImpl implements HotelBookingService {
         }
 
         return user;
-    }
-
-    @Transactional
-    @Override
-    public HotelBookingDto createHotelBooking(HotelBookingRequest hotelBookingRequest) {
-        log.debug("Create booking request started with {}", hotelBookingRequest.toString());
-
-            //Reserved the rooms
-            long daysCount = ChronoUnit.DAYS.between(hotelBookingRequest.getCheckInDate(), hotelBookingRequest.getCheckOutDate()) + 1;
-            List<RoomInventory> roomInventoryList = roomInventoryService.updateReservedRoomsCount(hotelBookingRequest);
-            if (daysCount != roomInventoryList.size()) {
-                throw new IllegalStateException("Rooms not available for " + daysCount + " days.");
-            }
-
-        Hotel hotel = hotelDomainService.getHotelByIdAndIsActive(
-                    hotelBookingRequest.getHotelId(),
-                    true
-            );
-
-        Room room = roomDomainService.getRoomById(
-                    hotelBookingRequest.getRoomId(),
-                    hotelBookingRequest.getHotelId()
-            );
-
-            User user = getAppUser();
-
-        log.debug("Booking object preparing....");
-            HotelBooking hotelBooking = HotelBooking.builder()
-                    .hotel(hotel)
-                    .room(room)
-                    .user(user)
-                    .bookingStatus(BookingStatus.RESERVED)
-                    .checkInDate(hotelBookingRequest.getCheckInDate())
-                    .checkOutDate(hotelBookingRequest.getCheckOutDate())
-                    .roomsCount(hotelBookingRequest.getBookedRoomsCount())
-                    .amount(BigDecimal.TEN)
-                    .build();
-
-            HotelBooking savedHotelBooking = hotelBookingRepository.save(hotelBooking);
-        log.debug("Hotel booking object prepared and saved with the id : {}", savedHotelBooking.getId());
-
-            return modelMapper.map(savedHotelBooking, HotelBookingDto.class);
     }
 
     private Boolean isBookingExpired(LocalDateTime bookingStartDate) {

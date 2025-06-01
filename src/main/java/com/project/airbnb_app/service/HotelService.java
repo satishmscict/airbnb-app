@@ -14,7 +14,7 @@ public interface HotelService {
 
     HotelAndRoomsDto getHotelAndRoomsDetails(Long hotelId);
 
-    HotelDto getHotelDtoByIdAndIsActive(Long hotelId);
+    HotelDto getHotelByIdAndIsActive(Long hotelId);
 
     void deleteHotel(Long hotelId);
 

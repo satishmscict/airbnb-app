@@ -24,7 +24,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public RoomDto createRoom(Long hotelId, RoomDto roomDto) {
-        Hotel hotel = hotelDomainService.getHotelByIdAndIsActive(hotelId, true);
+        Hotel hotel = hotelDomainService.getHotelByIdAndIsActivated(hotelId);
 
         log.debug("Convert RoomDto to Room and bind hotel to the room.");
         Room room = modelMapper.map(roomDto, Room.class);
@@ -75,7 +75,7 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public RoomDto updateRoomByHotelIdAndRoomId(Long hotelId, Long roomId, RoomDto roomDto) {
         log.debug("Start update room by hotel id: {} and room id: {}.", hotelId, roomId);
-        Hotel hotel = hotelDomainService.getHotelByIdAndIsActive(hotelId, true);
+        Hotel hotel = hotelDomainService.getHotelByIdAndIsActivated(hotelId);
 
         log.debug("Updating RoomDto.");
         roomDto.setId(roomId);

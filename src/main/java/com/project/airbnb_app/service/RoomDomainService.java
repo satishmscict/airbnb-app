@@ -23,6 +23,4 @@ public class RoomDomainService {
         log.debug("Room found with the hotel id: {} and room id: {}", hotelId, roomId);
         return room;
     }
-
-
 }

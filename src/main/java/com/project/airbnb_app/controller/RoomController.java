@@ -40,7 +40,7 @@ public class RoomController {
             @PathVariable Long hotelId,
             @PathVariable Long roomId
     ) {
-        RoomDto roomDto = roomService.getRoomDtoByHotelIdAndRoomId(hotelId, roomId);
+        RoomDto roomDto = roomService.getRoomByHotelIdAndRoomId(hotelId, roomId);
         return ResponseEntity.ok(roomDto);
     }
 

@@ -17,8 +17,9 @@ import org.springframework.stereotype.Service;
 public class RoomServiceImpl implements RoomService {
 
     private final HotelDomainService hotelDomainService;
-    private final RoomInventoryService roomInventoryService;
     private final ModelMapper modelMapper;
+    private final RoomDomainService roomDomainService;
+    private final RoomInventoryService roomInventoryService;
     private final RoomRepository roomRepository;
 
     @Override
@@ -49,7 +50,7 @@ public class RoomServiceImpl implements RoomService {
             throw new ResourceNotFoundException("Hotel not found with the id: " + hotelId);
         }
 
-        Room room = getRoomByHotelIdAndRoomId(hotelId, roomId);
+        Room room = roomDomainService.getRoomById(hotelId, roomId);
 
         log.debug("Hotel and Room exist, continue deleting...");
         roomInventoryService.deleteInventoryByHotelIdAndRoomId(hotelId, room.getId());
@@ -60,7 +61,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public Room getRoomByHotelIdAndRoomId(Long hotelId, Long roomId) {
+    public RoomDto getRoomByHotelIdAndRoomId(Long hotelId, Long roomId) {
         log.debug("Get room by hotel id: {} and room id: {}.", hotelId, roomId);
 
         Room room = roomRepository
@@ -68,15 +69,6 @@ public class RoomServiceImpl implements RoomService {
                 .orElseThrow(() -> new ResourceNotFoundException("Room not found with the hotel id: " + hotelId +
                         " room id: " + roomId));
         log.debug("Room found with the room capacity of {}.", room.getRoomCapacity());
-        return room;
-    }
-
-    @Override
-    public RoomDto getRoomDtoByHotelIdAndRoomId(Long hotelId, Long roomId) {
-        log.debug("Get the hotel info by id:  {}", roomId);
-        Room room = getRoomByHotelIdAndRoomId(hotelId, roomId);
-        log.debug("Room available with the hotel id: {} and room id: {}", hotelId, roomId);
-
         return modelMapper.map(room, RoomDto.class);
     }
 

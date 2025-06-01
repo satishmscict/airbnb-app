@@ -36,7 +36,7 @@ public class HotelBookingServiceImpl implements HotelBookingService {
     private final GuestService guestService;
     private final ModelMapper modelMapper;
     private final RoomInventoryService roomInventoryService;
-    private final RoomService roomService;
+    private final RoomDomainService roomDomainService;
 
     private static void validateBookingStatus(HotelBooking hotelBooking) {
         switch (hotelBooking.getBookingStatus()) {
@@ -107,7 +107,7 @@ public class HotelBookingServiceImpl implements HotelBookingService {
                     true
             );
 
-            Room room = roomService.getRoomByHotelIdAndRoomId(
+        Room room = roomDomainService.getRoomById(
                     hotelBookingRequest.getRoomId(),
                     hotelBookingRequest.getHotelId()
             );

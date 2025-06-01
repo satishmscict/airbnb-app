@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface HotelBookingService {
 
-    HotelBookingDto createHotelBooking(HotelBookingRequest hotelBookingRequest);
-
     List<GuestDto> addGuestsToBooking(Long bookingId, List<GuestDto> guestList);
+
+    HotelBookingDto createHotelBooking(HotelBookingRequest hotelBookingRequest);
 }

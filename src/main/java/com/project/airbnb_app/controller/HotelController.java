@@ -4,6 +4,7 @@ import com.project.airbnb_app.advice.ApiResponse;
 import com.project.airbnb_app.dto.HotelAndRoomsDto;
 import com.project.airbnb_app.dto.HotelDto;
 import com.project.airbnb_app.dto.request.HotelSearchRequest;
+import com.project.airbnb_app.service.HotelOrchestratorService;
 import com.project.airbnb_app.service.HotelService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -21,11 +22,12 @@ import java.util.List;
 @Tag(name = "Hotel API")
 public class HotelController {
 
+    private final HotelOrchestratorService hotelOrchestratorService;
     private final HotelService hotelService;
 
     @PatchMapping("/{hotelId}/activate")
     public ResponseEntity<HotelDto> activateHotel(@PathVariable Long hotelId) {
-        return ResponseEntity.ok(hotelService.activateHotel(hotelId));
+        return ResponseEntity.ok(hotelOrchestratorService.activateHotel(hotelId));
     }
 
     @PostMapping
@@ -35,7 +37,7 @@ public class HotelController {
 
     @DeleteMapping("/{hotelId}")
     public ResponseEntity<ApiResponse<String>> deleteHotelById(@PathVariable Long hotelId) {
-        String result = hotelService.deleteHotelById(hotelId);
+        String result = hotelOrchestratorService.deleteHotelWithDependencies(hotelId);
         ApiResponse<String> apiResponse = new ApiResponse<>(result);
         return ResponseEntity.ok(apiResponse);
     }
@@ -50,14 +52,14 @@ public class HotelController {
         return ResponseEntity.ok(hotelService.getHotelDtoByIdAndIsActive(hotelId));
     }
 
-    @GetMapping("/{hotelId}/getHotelAndRooms")
+    @GetMapping("/{hotelId}/rooms")
     public ResponseEntity<HotelAndRoomsDto> getHotelAndRoomsDetails(@PathVariable Long hotelId) {
         return ResponseEntity.ok(hotelService.getHotelAndRoomsDetails(hotelId));
     }
 
     @PostMapping("/search")
     public ResponseEntity<Page<HotelDto>> searchHotels(@Valid @RequestBody HotelSearchRequest hotelSearchRequest) {
-        Page<HotelDto> hotelDto = hotelService.findHotelsByCityAndAvailability(hotelSearchRequest);
+        Page<HotelDto> hotelDto = hotelOrchestratorService.findHotelsByCityAndAvailability(hotelSearchRequest);
         return ResponseEntity.ok(hotelDto);
     }
 }

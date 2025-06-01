@@ -32,62 +32,27 @@ public class HotelBookingServiceImpl implements HotelBookingService {
     // TODO: Refactor to use AppUserService and clean up related code.
     private final AppUserRepository appUserRepository;
     private final HotelBookingRepository hotelBookingRepository;
-    private final HotelService hotelService;
+    private final HotelDomainService hotelDomainService;
     private final GuestService guestService;
     private final ModelMapper modelMapper;
     private final RoomInventoryService roomInventoryService;
     private final RoomService roomService;
 
-    @Transactional
-    @Override
-    public HotelBookingDto createHotelBooking(HotelBookingRequest hotelBookingRequest) {
-        try {
-            log.info("Create booking request started with {}", hotelBookingRequest.toString());
-
-            //Reserved the rooms
-            long daysCount = ChronoUnit.DAYS.between(hotelBookingRequest.getCheckInDate(), hotelBookingRequest.getCheckOutDate()) + 1;
-            List<RoomInventory> roomInventoryList = roomInventoryService.updateReservedRoomsCount(hotelBookingRequest);
-            if (daysCount != roomInventoryList.size()) {
-                throw new IllegalStateException("Rooms not available for " + daysCount + " days.");
-            }
-
-            Hotel hotel = hotelService.getHotelByIdAndIsActive(
-                    hotelBookingRequest.getHotelId(),
-                    true
-            );
-
-            Room room = roomService.getRoomByHotelIdAndRoomId(
-                    hotelBookingRequest.getRoomId(),
-                    hotelBookingRequest.getHotelId()
-            );
-
-            User user = getAppUser();
-
-            log.info("Booking object preparing....");
-            HotelBooking hotelBooking = HotelBooking.builder()
-                    .hotel(hotel)
-                    .room(room)
-                    .user(user)
-                    .bookingStatus(BookingStatus.RESERVED)
-                    .checkInDate(hotelBookingRequest.getCheckInDate())
-                    .checkOutDate(hotelBookingRequest.getCheckOutDate())
-                    .roomsCount(hotelBookingRequest.getBookedRoomsCount())
-                    .amount(BigDecimal.TEN)
-                    .build();
-
-            HotelBooking savedHotelBooking = hotelBookingRepository.save(hotelBooking);
-            log.info("Hotel booking object prepared and saved with the id : {}", savedHotelBooking.getId());
-
-            return modelMapper.map(savedHotelBooking, HotelBookingDto.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Hotel booking failed : " + e.getCause());
+    private static void validateBookingStatus(HotelBooking hotelBooking) {
+        switch (hotelBooking.getBookingStatus()) {
+            case GUESTS_ADDED:
+                throw new IllegalStateException("Hey, you have already added a guest for this booking.");
+            case RESERVED:
+                break;
+            default:
+                throw new IllegalStateException("Hotel booking status is not RESERVED.");
         }
     }
 
     @Override
     @Transactional
     public List<GuestDto> addGuestsToBooking(Long bookingId, List<GuestDto> guestList) {
-        log.info("Adding guest to bookingId {} and total {} guests available.", bookingId, guestList.size());
+        log.debug("Adding guest to bookingId {} and total {} guests available.", bookingId, guestList.size());
 
         HotelBooking hotelBooking = hotelBookingRepository
                 .findById(bookingId)
@@ -97,20 +62,14 @@ public class HotelBookingServiceImpl implements HotelBookingService {
             throw new IllegalStateException("Hotel booking has expired. Please initiate a new booking.");
         }
 
-        if (hotelBooking.getBookingStatus() != BookingStatus.RESERVED) {
-            throw new IllegalStateException("Hotel booking status is not RESERVED.");
-        }
+        validateBookingStatus(hotelBooking);
 
         List<GuestDto> guestDtoList = guestService.addGuests(hotelBooking.getUser(), guestList);
         hotelBooking.setBookingStatus(BookingStatus.GUESTS_ADDED);
         hotelBookingRepository.save(hotelBooking);
-        log.info("Guests added and update status to GUESTS_ADDED");
+        log.debug("Guests added and update status to GUESTS_ADDED");
 
         return guestDtoList;
-    }
-
-    private Boolean isBookingExpired(LocalDateTime bookingStartDate) {
-        return bookingStartDate.plusMinutes(BOOKING_EXPIRED_MINUTES).isBefore(LocalDateTime.now());
     }
 
     private User getAppUser() {
@@ -129,5 +88,51 @@ public class HotelBookingServiceImpl implements HotelBookingService {
         }
 
         return user;
+    }
+
+    @Transactional
+    @Override
+    public HotelBookingDto createHotelBooking(HotelBookingRequest hotelBookingRequest) {
+        log.debug("Create booking request started with {}", hotelBookingRequest.toString());
+
+            //Reserved the rooms
+            long daysCount = ChronoUnit.DAYS.between(hotelBookingRequest.getCheckInDate(), hotelBookingRequest.getCheckOutDate()) + 1;
+            List<RoomInventory> roomInventoryList = roomInventoryService.updateReservedRoomsCount(hotelBookingRequest);
+            if (daysCount != roomInventoryList.size()) {
+                throw new IllegalStateException("Rooms not available for " + daysCount + " days.");
+            }
+
+        Hotel hotel = hotelDomainService.getHotelByIdAndIsActive(
+                    hotelBookingRequest.getHotelId(),
+                    true
+            );
+
+            Room room = roomService.getRoomByHotelIdAndRoomId(
+                    hotelBookingRequest.getRoomId(),
+                    hotelBookingRequest.getHotelId()
+            );
+
+            User user = getAppUser();
+
+        log.debug("Booking object preparing....");
+            HotelBooking hotelBooking = HotelBooking.builder()
+                    .hotel(hotel)
+                    .room(room)
+                    .user(user)
+                    .bookingStatus(BookingStatus.RESERVED)
+                    .checkInDate(hotelBookingRequest.getCheckInDate())
+                    .checkOutDate(hotelBookingRequest.getCheckOutDate())
+                    .roomsCount(hotelBookingRequest.getBookedRoomsCount())
+                    .amount(BigDecimal.TEN)
+                    .build();
+
+            HotelBooking savedHotelBooking = hotelBookingRepository.save(hotelBooking);
+        log.debug("Hotel booking object prepared and saved with the id : {}", savedHotelBooking.getId());
+
+            return modelMapper.map(savedHotelBooking, HotelBookingDto.class);
+    }
+
+    private Boolean isBookingExpired(LocalDateTime bookingStartDate) {
+        return bookingStartDate.plusMinutes(BOOKING_EXPIRED_MINUTES).isBefore(LocalDateTime.now());
     }
 }

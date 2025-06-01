@@ -6,10 +6,8 @@ import com.project.airbnb_app.dto.request.HotelSearchRequest;
 import com.project.airbnb_app.entity.Hotel;
 import com.project.airbnb_app.entity.Room;
 import com.project.airbnb_app.entity.RoomInventory;
-import com.project.airbnb_app.exception.ResourceNotFoundException;
-import com.project.airbnb_app.repository.HotelRepository;
 import com.project.airbnb_app.repository.RoomInventoryRepository;
-import com.project.airbnb_app.repository.RoomRepository;
+import jakarta.persistence.OptimisticLockException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,15 +28,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RoomInventoryServiceImpl implements RoomInventoryService {
 
-    //private final HotelBookingRepository hotelBookingRepository;
     private static final int TOTAL_INVENTORY_YEARS = 1;
 
-    // TODO: Refactor to use HotelService and clean up related code.
-    private final HotelRepository hotelRepository;
+    private final HotelDomainService hotelDomainService;
     private final ModelMapper modelMapper;
+    private final RoomDomainService roomDomainService;
     private final RoomInventoryRepository roomInventoryRepository;
-    // TODO: Refactor to use RoomService and clean up related code.
-    private final RoomRepository roomRepository;
 
     private static RoomInventory buildInventory(Hotel hotel, Room room, LocalDate date) {
         return RoomInventory
@@ -59,14 +54,14 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
     @Override
     @Transactional
     public void deleteInventoryByHotelIdAndRoomId(Long hotelId, Long roomId) {
-        log.info("Delete inventory with the hotel id: {} and room id: {}.", hotelId, roomId);
+        log.debug("Delete inventory with the hotel id: {} and room id: {}.", hotelId, roomId);
         roomInventoryRepository.deleteAllByHotelIdAndRoomId(hotelId, roomId);
-        log.info("Delete inventory with the hotel id: {} and room id: {} is completed.", hotelId, roomId);
+        log.debug("Delete inventory with the hotel id: {} and room id: {} is completed.", hotelId, roomId);
     }
 
     @Override
     public Page<HotelDto> findHotelsByCityAndAvailability(HotelSearchRequest hotelSearchRequest) {
-        log.info("Find hotels by city: {}, start date: {} and end date: {} with total {} rooms.",
+        log.debug("Find hotels by city: {}, start date: {} and end date: {} with total {} rooms.",
                 hotelSearchRequest.getCity(),
                 hotelSearchRequest.getStartDate(),
                 hotelSearchRequest.getEndDate(),
@@ -83,7 +78,7 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
                 daysCount,
                 pageable
         );
-        log.info("Total {} hotels found.", inventory.getContent().size());
+        log.debug("Total {} hotels found.", inventory.getContent().size());
 
         return inventory.map((element) -> modelMapper.map(element, HotelDto.class));
     }
@@ -103,25 +98,27 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
 
     @Transactional
     private List<RoomInventory> findAndLockAvailableInventory(HotelBookingRequest hotelBookingRequest) {
-        return roomInventoryRepository.findAndLockAvailableInventory(
-                hotelBookingRequest.getRoomId(),
-                hotelBookingRequest.getCheckInDate().toLocalDate(),
-                hotelBookingRequest.getCheckOutDate().toLocalDate(),
-                hotelBookingRequest.getBookedRoomsCount()
-        );
+        try {
+            return roomInventoryRepository.findAndLockAvailableInventory(
+                    hotelBookingRequest.getRoomId(),
+                    hotelBookingRequest.getCheckInDate().toLocalDate(),
+                    hotelBookingRequest.getCheckOutDate().toLocalDate(),
+                    hotelBookingRequest.getBookedRoomsCount()
+            );
+        } catch (OptimisticLockException optimisticLockException) {
+            throw new RuntimeException(optimisticLockException);
+        }
     }
 
     @Override
     public void createInventory(Long hotelId, Long roomId) {
-        Hotel hotel = getHotel(hotelId);
+        Hotel hotel = hotelDomainService.getHotelById(hotelId);
 
-        log.info("Fetch room by id {}", roomId);
-        Room room = roomRepository
-                .findById(roomId)
-                .orElseThrow(() -> new ResourceNotFoundException("Room not found with the id: " + roomId));
-        log.info("Room found with the id: {}", roomId);
+        log.debug("Fetch room by id {}", roomId);
+        Room room = roomDomainService.getRoomById(hotelId, roomId);
+        log.debug("Room found with the id: {}", roomId);
 
-        log.info("Generate inventory for next {} days", TOTAL_INVENTORY_YEARS);
+        log.debug("Generate inventory for next {} days", TOTAL_INVENTORY_YEARS);
         LocalDate currentDate = LocalDate.now();
         LocalDate endDate = currentDate.plusYears(TOTAL_INVENTORY_YEARS);
 
@@ -132,15 +129,6 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
         }
         roomInventoryRepository.saveAll(generateRoomInventory);
 
-        log.info("Successfully generate and save all the inventories, total {} inventories created.", generateRoomInventory.size());
-    }
-
-    private Hotel getHotel(Long hotelId) {
-        log.info("Get hotel by id {}", hotelId);
-        Hotel hotel = hotelRepository
-                .findById(hotelId)
-                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found with the id: " + hotelId));
-        log.info("Hotel found with the name: {}", hotel.getName());
-        return hotel;
+        log.debug("Successfully generate and save all the inventories, total {} inventories created.", generateRoomInventory.size());
     }
 }

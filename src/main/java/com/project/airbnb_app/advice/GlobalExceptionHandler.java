@@ -35,7 +35,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({
             Exception.class,
-            IllegalStateException.class
+            IllegalStateException.class,
+            RuntimeException.class
     })
     public ResponseEntity<ApiResponse<?>> handleInternalServerError(Exception exception) {
         log.error("Error cause: {}", exception.toString());

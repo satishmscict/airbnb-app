@@ -25,6 +25,9 @@ public class RoomInventory extends CreatedAndUpdatedTime {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    @Version
+    private Long version;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hotel_id", nullable = false)
     private Hotel hotel;

@@ -24,7 +24,7 @@ public class GuestServiceImpl implements GuestService {
 
     @Override
     public List<GuestDto> addGuests(User user, List<GuestDto> guestDtoList) {
-        log.info("Add guest started with {} guests.", guestDtoList.size());
+        log.debug("Add guest started with {} guests.", guestDtoList.size());
         List<Guest> guestList = guestDtoList
                 .stream()
                 .map((element) -> {
@@ -35,7 +35,7 @@ public class GuestServiceImpl implements GuestService {
                 .toList();
 
         guestList = guestRepository.saveAll(guestList);
-        log.info("Saved all guests details.");
+        log.debug("Saved all guests details.");
 
         guestDtoList = guestList.stream().map((element) -> modelMapper.map(element, GuestDto.class)).toList();
 

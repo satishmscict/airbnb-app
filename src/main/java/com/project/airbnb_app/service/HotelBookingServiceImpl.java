@@ -72,7 +72,7 @@ public class HotelBookingServiceImpl implements HotelBookingService {
     public HotelBookingDto createHotelBooking(HotelBookingRequest hotelBookingRequest) {
         log.debug("Create booking request started with {}", hotelBookingRequest.toString());
 
-        //Reserved the rooms
+        // Validating reserved rooms availability.
         long daysCount = ChronoUnit.DAYS.between(hotelBookingRequest.getCheckInDate(), hotelBookingRequest.getCheckOutDate()) + 1;
         List<RoomInventory> roomInventoryList = roomInventoryService.updateReservedRoomsCount(hotelBookingRequest);
         if (daysCount != roomInventoryList.size()) {
@@ -105,24 +105,6 @@ public class HotelBookingServiceImpl implements HotelBookingService {
 
         return modelMapper.map(savedHotelBooking, HotelBookingDto.class);
     }
-
-//    private User getAppUser() {
-//        Set<Role> roleSet = EnumSet.of(Role.GUEST);
-//
-//        User user = appUserRepository.findById(1L).orElse(null);
-//        if (user == null) {
-//            user = User
-//                    .builder()
-//                    .email("satish@gmail.com")
-//                    .name("Satish")
-//                    .roles(roleSet)
-//                    .password("sa@1234")
-//                    .build();
-//            user = appUserRepository.save(user);
-//        }
-//
-//        return user;
-//    }
 
     private Boolean isBookingExpired(LocalDateTime bookingStartDate) {
         return bookingStartDate.plusMinutes(BOOKING_EXPIRED_MINUTES).isBefore(LocalDateTime.now());

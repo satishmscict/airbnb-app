@@ -16,11 +16,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class HotelOrchestratorServiceImpl implements HotelOrchestratorService {
 
-    private final HotelService hotelService;
     private final HotelDomainService hotelDomainService;
-    private final RoomService roomService;
-    private final RoomInventoryService roomInventoryService;
+    private final HotelService hotelService;
     private final ModelMapper modelMapper;
+    private final RoomInventoryService roomInventoryService;
+    private final RoomService roomService;
 
     @Override
     public HotelDto activateHotel(Long hotelId) {
@@ -30,7 +30,7 @@ public class HotelOrchestratorServiceImpl implements HotelOrchestratorService {
         hotelService.save(hotel);
         log.debug("Hotel with id {} activated successfully.", hotelId);
 
-        log.debug("Create Inventory for Each Room.");
+        log.debug("Create Inventory for Each Room. Total {} rooms available.", hotel.getRooms().size());
         for (Room room : hotel.getRooms()) {
             roomInventoryService.createInventory(hotelId, room.getId());
         }

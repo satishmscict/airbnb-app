@@ -70,7 +70,7 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
         Pageable pageable = PageRequest.of(hotelSearchRequest.getPageNo(), hotelSearchRequest.getPageSize());
         Long daysCount = ChronoUnit.DAYS.between(hotelSearchRequest.getStartDate(), hotelSearchRequest.getEndDate());
 
-        Page<Hotel> inventory = roomInventoryRepository.findHotelsByCityAndAvailability(
+        Page<Hotel> hotelsList = roomInventoryRepository.findHotelsByCityAndAvailability(
                 hotelSearchRequest.getCity(),
                 hotelSearchRequest.getStartDate(),
                 hotelSearchRequest.getEndDate(),
@@ -78,9 +78,9 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
                 daysCount,
                 pageable
         );
-        log.debug("Total {} hotels found.", inventory.getContent().size());
+        log.debug("Total {} hotels found.", hotelsList.getContent().size());
 
-        return inventory.map((element) -> modelMapper.map(element, HotelDto.class));
+        return hotelsList.map((element) -> modelMapper.map(element, HotelDto.class));
     }
 
     @Transactional

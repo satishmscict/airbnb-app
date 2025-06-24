@@ -30,8 +30,8 @@ public class HotelBookingServiceImpl implements HotelBookingService {
     private final HotelDomainService hotelDomainService;
     private final GuestService guestService;
     private final ModelMapper modelMapper;
-    private final RoomInventoryService roomInventoryService;
     private final RoomDomainService roomDomainService;
+    private final RoomInventoryService roomInventoryService;
 
     private static void validateBookingStatus(HotelBooking hotelBooking) {
         switch (hotelBooking.getBookingStatus()) {

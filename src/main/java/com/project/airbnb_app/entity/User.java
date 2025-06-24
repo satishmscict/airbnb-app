@@ -2,16 +2,21 @@ package com.project.airbnb_app.entity;
 
 import com.project.airbnb_app.entity.enums.Role;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
+@Entity
 @Getter
 @Setter
-@Entity
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "app_user")
-public class User extends CreatedAndUpdatedTime {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,4 +35,11 @@ public class User extends CreatedAndUpdatedTime {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Set<Role> roles;
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }

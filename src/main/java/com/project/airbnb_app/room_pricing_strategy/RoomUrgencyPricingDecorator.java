@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @RequiredArgsConstructor
-public class UrgencyRoomPricingDecorator implements RoomPricingStrategy {
+public class RoomUrgencyPricingDecorator implements RoomPricingStrategy {
 
     private static final int URGENCY_DAYS_LIMIT = 7;
     private static final double URGENCY_MULTIPLIER = 1.15;
@@ -19,9 +19,9 @@ public class UrgencyRoomPricingDecorator implements RoomPricingStrategy {
 
         BigDecimal basePrice = baseRoomPricingStrategy.calculatePrice(roomInventory);
 
-        LocalDate today = LocalDate.now();
-        if (!roomInventory.getDate().isBefore(today)
-                && roomInventory.getDate().isBefore(today.plusDays(URGENCY_DAYS_LIMIT))
+        LocalDate currentDate = LocalDate.now();
+        if (!roomInventory.getDate().isBefore(currentDate)
+                && roomInventory.getDate().isBefore(currentDate.plusDays(URGENCY_DAYS_LIMIT))
         ) {
             basePrice = basePrice.multiply(BigDecimal.valueOf(URGENCY_MULTIPLIER));
         }

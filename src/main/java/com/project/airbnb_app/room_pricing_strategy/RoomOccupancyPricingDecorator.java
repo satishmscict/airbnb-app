@@ -6,19 +6,20 @@ import lombok.RequiredArgsConstructor;
 import java.math.BigDecimal;
 
 @RequiredArgsConstructor
-public class HolidayRoomPricingDecorator implements RoomPricingStrategy {
+public class RoomOccupancyPricingDecorator implements RoomPricingStrategy {
 
-    private static final double HOLIDAY_MULTIPLIER = 1.25;
+    private static final double OCCUPANCY_MULTIPLIER = 1.2;
 
     private final RoomPricingStrategy baseRoomPricingStrategy;
+
 
     @Override
     public BigDecimal calculatePrice(RoomInventory roomInventory) {
         BigDecimal basePrice = baseRoomPricingStrategy.calculatePrice(roomInventory);
 
-        boolean isTodayHoliday = true; // Need to check with third party API.
-        if (isTodayHoliday) {
-            basePrice = basePrice.multiply(BigDecimal.valueOf(HOLIDAY_MULTIPLIER));
+        double occupancy = (double) roomInventory.getBookedRoomsCount() / roomInventory.getTotalRoomsCount();
+        if (occupancy > 0.8) {
+            basePrice = basePrice.multiply(BigDecimal.valueOf(OCCUPANCY_MULTIPLIER));
         }
 
         return basePrice;

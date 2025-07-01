@@ -11,13 +11,13 @@ import java.math.BigDecimal;
 public class RoomPricingCalculatorService {
 
     private BigDecimal calculateDynamicPricing(RoomInventory roomInventory) {
-        RoomPricingStrategy priceCalculator = new BaseRoomPricingStrategy();
+        RoomPricingStrategy priceCalculator = new RoomBasePricingStrategy();
 
         //Apply the additional strategies.
-        priceCalculator = new SurgeRoomPricingDecorator(priceCalculator);
-        priceCalculator = new OccupancyRoomPricingDecorator(priceCalculator);
-        priceCalculator = new UrgencyRoomPricingDecorator(priceCalculator);
-        priceCalculator = new HolidayRoomPricingDecorator(priceCalculator);
+        priceCalculator = new RoomSurgePricingDecorator(priceCalculator);
+        priceCalculator = new RoomOccupancyPricingDecorator(priceCalculator);
+        priceCalculator = new RoomUrgencyPricingDecorator(priceCalculator);
+        priceCalculator = new RoomHolidayPricingDecorator(priceCalculator);
 
         return priceCalculator.calculatePrice(roomInventory);
     }

@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import java.math.BigDecimal;
 
 @RequiredArgsConstructor
-public class SurgeRoomPricingDecorator implements RoomPricingStrategy {
+public class RoomSurgePricingDecorator implements RoomPricingStrategy {
 
     private final RoomPricingStrategy baseRoomPricingStrategy;
 

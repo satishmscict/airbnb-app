@@ -35,6 +35,12 @@ public interface RoomInventoryRepository extends JpaRepository<RoomInventory, Lo
             @Param("roomsCount") Integer roomsCount
     );
 
+    List<RoomInventory> findByHotelAndDateBetween(
+            Hotel hotel,
+            LocalDate startDate,
+            LocalDate endDate
+    );
+
     @Query("""
             SELECT DISTINCT ri.hotel
             FROM RoomInventory ri

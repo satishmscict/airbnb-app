@@ -60,7 +60,12 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
     }
 
     @Override
-    public Page<HotelDto> findHotelsByCityAndAvailability(HotelSearchRequest hotelSearchRequest) {
+    public void saveAll(List<RoomInventory> roomInventories) {
+        roomInventoryRepository.saveAll(roomInventories);
+    }
+
+    @Override
+    public Page<HotelDto> searchHotelsByCityAndAvailability(HotelSearchRequest hotelSearchRequest) {
         log.debug("Find hotels by city: {}, start date: {} and end date: {} with total {} rooms.",
                 hotelSearchRequest.getCity(),
                 hotelSearchRequest.getStartDate(),

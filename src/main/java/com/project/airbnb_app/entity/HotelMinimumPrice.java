@@ -1,20 +1,24 @@
 package com.project.airbnb_app.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
-@Table(name = "room")
-public class Room {
+@NoArgsConstructor
+@Table(name = "hotel_minimum_price")
+// Save the cheapest room price of hotel. To show the search UI with the minimum price like AirBnb or Oyo website
+// with calendar view with 90 days price.
+public class HotelMinimumPrice {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,35 +26,22 @@ public class Room {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hotel_id", nullable = false)
-    @JsonIgnore
     private Hotel hotel;
 
     @Column(nullable = false)
-    private String type;
+    private LocalDate date;
 
-    @Column(
-            nullable = false,
-            precision = 10,
-            scale = 2
-    )
-    private BigDecimal basePrice;
-
-    @Column(name = "amenities", columnDefinition = "TEXT[]")
-    private String[] amenities;
-
-    @Column(name = "photos", columnDefinition = "TEXT[]")
-    private String[] photos;
-
-    @Column(nullable = false)
-    private Integer totalRoomCount;
-
-    @Column(nullable = false)
-    private Integer roomCapacity;
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
 
     @CreationTimestamp
-    @Column(updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public HotelMinimumPrice(Hotel hotel, LocalDate date) {
+        this.hotel = hotel;
+        this.date = date;
+    }
 }

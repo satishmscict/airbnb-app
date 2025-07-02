@@ -50,6 +50,7 @@ public class PriceUpdateServiceImpl implements PriceUpdateService {
             hotelPage.getContent().forEach(this::updatePriceForHotel);
             pageSize++;
         }
+        log.debug("Completed scheduled hotel price update.");
     }
 
     private void updatePriceForHotel(Hotel hotel) {

@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 @Service
 public class RoomPricingCalculatorService {
 
-    private BigDecimal calculateDynamicPricing(RoomInventory roomInventory) {
+    public BigDecimal calculateDynamicPricing(RoomInventory roomInventory) {
         RoomPricingStrategy priceCalculator = new RoomBasePricingStrategy();
 
         //Apply the additional strategies.

@@ -3,6 +3,7 @@ package com.project.airbnb_app.controller;
 import com.project.airbnb_app.advice.ApiResponse;
 import com.project.airbnb_app.dto.HotelAndRoomsDto;
 import com.project.airbnb_app.dto.HotelDto;
+import com.project.airbnb_app.dto.HotelMinimumPriceDto;
 import com.project.airbnb_app.dto.request.HotelSearchRequest;
 import com.project.airbnb_app.service.HotelOrchestratorService;
 import com.project.airbnb_app.service.HotelService;
@@ -59,7 +60,13 @@ public class HotelController {
 
     @PostMapping("/search")
     public ResponseEntity<Page<HotelDto>> searchHotels(@Valid @RequestBody HotelSearchRequest hotelSearchRequest) {
-        Page<HotelDto> hotelDto = hotelOrchestratorService.findHotelsByCityAndAvailability(hotelSearchRequest);
+        Page<HotelDto> hotelDto = hotelOrchestratorService.searchHotelsByCityAndAvailability(hotelSearchRequest);
+        return ResponseEntity.ok(hotelDto);
+    }
+
+    @PostMapping("/searchWithMinimumPrice")
+    public ResponseEntity<Page<HotelMinimumPriceDto>> searchWithMinimumPrice(@Valid @RequestBody HotelSearchRequest hotelSearchRequest) {
+        Page<HotelMinimumPriceDto> hotelDto = hotelOrchestratorService.searchHotelsByCityWithCheapestPrice(hotelSearchRequest);
         return ResponseEntity.ok(hotelDto);
     }
 }

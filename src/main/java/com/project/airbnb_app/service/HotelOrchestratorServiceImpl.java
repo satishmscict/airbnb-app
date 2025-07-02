@@ -1,6 +1,7 @@
 package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.dto.HotelDto;
+import com.project.airbnb_app.dto.HotelMinimumPriceDto;
 import com.project.airbnb_app.dto.request.HotelSearchRequest;
 import com.project.airbnb_app.entity.Hotel;
 import com.project.airbnb_app.entity.Room;
@@ -60,7 +61,12 @@ public class HotelOrchestratorServiceImpl implements HotelOrchestratorService {
     }
 
     @Override
-    public Page<HotelDto> findHotelsByCityAndAvailability(HotelSearchRequest hotelSearchRequest) {
-        return roomInventoryService.findHotelsByCityAndAvailability(hotelSearchRequest);
+    public Page<HotelDto> searchHotelsByCityAndAvailability(HotelSearchRequest hotelSearchRequest) {
+        return roomInventoryService.searchHotelsByCityAndAvailability(hotelSearchRequest);
+    }
+
+    @Override
+    public Page<HotelMinimumPriceDto> searchHotelsByCityWithCheapestPrice(HotelSearchRequest hotelSearchRequest) {
+        return roomInventoryService.searchHotelsByCityWithCheapestPrice(hotelSearchRequest);
     }
 }

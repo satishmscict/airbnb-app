@@ -2,14 +2,20 @@ package com.project.airbnb_app.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 // Save the cheapest room price of hotel. To show the search UI with the minimum price like AirBnb or Oyo.
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
 public class HotelMinimumPrice {
 
     @Id
@@ -24,5 +30,16 @@ public class HotelMinimumPrice {
     private LocalDate date;
 
     @Column(nullable = false, precision = 10, scale = 2)
-    private Long hotelMinimumPrice;
+    private BigDecimal hotelMinimumPrice;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
+
+    public HotelMinimumPrice(Hotel hotel, LocalDate date) {
+        this.hotel = hotel;
+        this.date = date;
+    }
 }

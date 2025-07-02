@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 public class HotelMinimumPriceDto {
     // TODO: Possibility to avoid entity here.
     private Hotel hotel;
-    private double price;
+    private Double price;
 }

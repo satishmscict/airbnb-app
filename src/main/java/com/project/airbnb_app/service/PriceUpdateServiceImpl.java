@@ -29,7 +29,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class PriceUpdateServiceImpl implements PriceUpdateService {
 
-    private final int TOTAL_YEARS = 1;
+    private static final int BATCH_SIZE = 100;
+    private static final int TOTAL_YEARS = 1;
 
     private final HotelMinimumPriceRepository hotelMinimumPriceRepository;
     private final HotelRepository hotelRepository;
@@ -39,43 +40,39 @@ public class PriceUpdateServiceImpl implements PriceUpdateService {
     @Scheduled(cron = "0 0 * * * *")
     @Override
     public void updateHotelPrice() {
-        log.debug("Update hotel price starting.");
+        log.debug("Starting scheduled hotel price update.");
         int pageSize = 0;
-        int batchSize = 100;
 
         while (true) {
-            Page<Hotel> hotelPage = hotelRepository.findAll(PageRequest.of(pageSize, batchSize));
+            Page<Hotel> hotelPage = hotelRepository.findAll(PageRequest.of(pageSize, BATCH_SIZE));
             if (hotelPage.isEmpty()) {
                 break;
             }
 
-            hotelPage.getContent().forEach(this::updateHotelPrice);
-
+            hotelPage.getContent().forEach(this::updatePriceForHotel);
             pageSize++;
         }
-        log.debug("Update hotel price completed.");
     }
 
-    private void updateHotelPrice(Hotel hotel) {
-        log.debug("Update hotel price started for hotel id {}", hotel.getId());
+    private void updatePriceForHotel(Hotel hotel) {
+        log.debug("Updating price for hotel Id: {}", hotel.getId());
         LocalDate startDate = LocalDate.now();
         LocalDate endDate = startDate.plusYears(TOTAL_YEARS);
 
         List<RoomInventory> roomInventoryList = roomInventoryRepository.findByHotelAndDateBetween(hotel, startDate, endDate);
-        updateInventoryPrice(roomInventoryList);
 
-        updateHotelMiniumPrice(hotel, roomInventoryList);
-        log.debug("Update hotel price completed.");
+        updateRoomInventoryPrices(roomInventoryList);
+        updateMinimumHotelPrices(hotel, roomInventoryList);
     }
 
-    private void updateHotelMiniumPrice(
+    private void updateMinimumHotelPrices(
             Hotel hotel,
-            List<RoomInventory> roomInventoryList
+            List<RoomInventory> roomInventories
     ) {
-        log.debug("Update hotel minimum price  started for hotel id {}", hotel.getId());
+        log.debug("Updating minimum prices for hotel Id: {}", hotel.getId());
+
         // Compute minimum price per day of hotel. Get the room with the cheapest price from available room types and perform dynamic price calculation.
-        Map<LocalDate, BigDecimal> cheapestRoomPriceMap = roomInventoryList
-                .stream()
+        Map<LocalDate, BigDecimal> minimumPricePerDayMap = roomInventories.stream()
                 .collect(Collectors.groupingBy(
                                 RoomInventory::getDate,
                                 Collectors.mapping(RoomInventory::getPrice, Collectors.minBy(Comparator.naturalOrder()))
@@ -86,32 +83,31 @@ public class PriceUpdateServiceImpl implements PriceUpdateService {
                         Collectors.toMap(Map.Entry::getKey, v -> v.getValue().orElse(BigDecimal.ZERO))
                 );
 
-        log.debug("cheapest room price map is : {}", cheapestRoomPriceMap);
+        log.debug("cheapest room price map is : {}", minimumPricePerDayMap);
 
         List<HotelMinimumPrice> hotelMinimumPricesList = new ArrayList<>();
-        cheapestRoomPriceMap.forEach((localDate, roomPrice) -> {
+        minimumPricePerDayMap.forEach((localDate, roomPrice) -> {
             HotelMinimumPrice hotelMinimumPrice = hotelMinimumPriceRepository.findHotelByHotelAndDate(hotel, localDate).orElse(
                             new HotelMinimumPrice(hotel, localDate)
                     );
 
             hotelMinimumPrice.setPrice(roomPrice);
-                    // Prepare hotel min price list for bulk insert.
                     hotelMinimumPricesList.add(hotelMinimumPrice);
                 }
         );
 
         hotelMinimumPriceRepository.saveAll(hotelMinimumPricesList);
-        log.debug("Hotel minimum price updated for {} inventories.", hotelMinimumPricesList.size());
+        log.debug("Hotel minimum prices updated for {} days.", hotelMinimumPricesList.size());
     }
 
-    private void updateInventoryPrice(List<RoomInventory> roomInventoryList) {
-        log.debug("Update inventory price started for {} inventories.", roomInventoryList.size());
-        roomInventoryList.forEach(roomInventory -> {
+    private void updateRoomInventoryPrices(List<RoomInventory> roomInventories) {
+        log.debug("Updating dynamic prices for {} inventories.", roomInventories.size());
+        roomInventories.forEach(roomInventory -> {
             BigDecimal dynamicPricing = dynamicRoomPricingService.calculateFinalPrice(roomInventory);
             roomInventory.setPrice(dynamicPricing);
         });
 
-        roomInventoryRepository.saveAll(roomInventoryList);
-        log.debug("Update inventory price completed");
+        roomInventoryRepository.saveAll(roomInventories);
+        log.debug("Dynamic prices updated successfully.");
     }
 }

@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "hotel_minium_price")
+@Table(name = "hotel_minimum_price")
 public class HotelMinimumPrice {
 
     @Id

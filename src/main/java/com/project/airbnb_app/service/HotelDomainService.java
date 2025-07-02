@@ -5,6 +5,8 @@ import com.project.airbnb_app.exception.ResourceNotFoundException;
 import com.project.airbnb_app.repository.HotelRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 // Don’t need to create an interface and a separate implementation class.
@@ -37,6 +39,10 @@ public class HotelDomainService {
         log.debug("Hotel found with the id: {}", hotelId);
 
         return hotel;
+    }
+
+    Page<Hotel> getHotels(int pageSize, int batchSize) {
+        return hotelRepository.findAll(PageRequest.of(pageSize, batchSize));
     }
 
     Boolean isHotelExistById(Long hotelId) {

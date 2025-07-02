@@ -3,15 +3,11 @@ package com.project.airbnb_app.service;
 import com.project.airbnb_app.entity.Hotel;
 import com.project.airbnb_app.entity.HotelMinimumPrice;
 import com.project.airbnb_app.entity.RoomInventory;
-import com.project.airbnb_app.repository.HotelMinimumPriceRepository;
-import com.project.airbnb_app.repository.HotelRepository;
-import com.project.airbnb_app.repository.RoomInventoryRepository;
 import com.project.airbnb_app.room_pricing_strategy.DynamicRoomPricingService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -32,10 +28,12 @@ public class PriceUpdateServiceImpl implements PriceUpdateService {
     private static final int BATCH_SIZE = 100;
     private static final int TOTAL_YEARS = 1;
 
-    private final HotelMinimumPriceRepository hotelMinimumPriceRepository;
-    private final HotelRepository hotelRepository;
-    private final RoomInventoryRepository roomInventoryRepository;
     private final DynamicRoomPricingService dynamicRoomPricingService;
+    private final HotelDomainService hotelDomainService;
+    private final HotelMinimumPriceDomainService hotelMinimumPriceDomainService;
+    private final HotelMiniumPriceService hotelMiniumPriceService;
+    private final RoomInventoryDomainService roomInventoryDomainService;
+    private final RoomInventoryService roomInventoryService;
 
     @Scheduled(cron = "0 0 * * * *")
     @Override
@@ -44,7 +42,7 @@ public class PriceUpdateServiceImpl implements PriceUpdateService {
         int pageSize = 0;
 
         while (true) {
-            Page<Hotel> hotelPage = hotelRepository.findAll(PageRequest.of(pageSize, BATCH_SIZE));
+            Page<Hotel> hotelPage = hotelDomainService.getHotels(pageSize, BATCH_SIZE);
             if (hotelPage.isEmpty()) {
                 break;
             }
@@ -59,7 +57,7 @@ public class PriceUpdateServiceImpl implements PriceUpdateService {
         LocalDate startDate = LocalDate.now();
         LocalDate endDate = startDate.plusYears(TOTAL_YEARS);
 
-        List<RoomInventory> roomInventoryList = roomInventoryRepository.findByHotelAndDateBetween(hotel, startDate, endDate);
+        List<RoomInventory> roomInventoryList = roomInventoryDomainService.findByHotelAndDateBetween(hotel, startDate, endDate);
 
         updateRoomInventoryPrices(roomInventoryList);
         updateMinimumHotelPrices(hotel, roomInventoryList);
@@ -87,7 +85,7 @@ public class PriceUpdateServiceImpl implements PriceUpdateService {
 
         List<HotelMinimumPrice> hotelMinimumPricesList = new ArrayList<>();
         minimumPricePerDayMap.forEach((localDate, roomPrice) -> {
-            HotelMinimumPrice hotelMinimumPrice = hotelMinimumPriceRepository.findHotelByHotelAndDate(hotel, localDate).orElse(
+            HotelMinimumPrice hotelMinimumPrice = hotelMinimumPriceDomainService.findHotelByHotelAndDate(hotel, localDate).orElse(
                             new HotelMinimumPrice(hotel, localDate)
                     );
 
@@ -96,7 +94,7 @@ public class PriceUpdateServiceImpl implements PriceUpdateService {
                 }
         );
 
-        hotelMinimumPriceRepository.saveAll(hotelMinimumPricesList);
+        hotelMiniumPriceService.saveAll(hotelMinimumPricesList);
         log.debug("Hotel minimum prices updated for {} days.", hotelMinimumPricesList.size());
     }
 
@@ -107,7 +105,7 @@ public class PriceUpdateServiceImpl implements PriceUpdateService {
             roomInventory.setPrice(dynamicPricing);
         });
 
-        roomInventoryRepository.saveAll(roomInventories);
+        roomInventoryService.saveAll(roomInventories);
         log.debug("Dynamic prices updated successfully.");
     }
 }

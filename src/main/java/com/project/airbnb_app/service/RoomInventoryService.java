@@ -14,6 +14,8 @@ public interface RoomInventoryService {
 
     void deleteInventoryByHotelIdAndRoomId(Long hotelId, Long roomId);
 
+    void saveAll(List<RoomInventory> roomInventories);
+
     Page<HotelDto> searchHotelsByCityAndAvailability(HotelSearchRequest hotelSearchRequest);
 
     List<RoomInventory> updateReservedRoomsCount(HotelBookingRequest hotelBookingRequest);

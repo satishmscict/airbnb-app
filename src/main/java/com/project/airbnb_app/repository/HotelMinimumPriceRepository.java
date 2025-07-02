@@ -17,12 +17,12 @@ import java.util.Optional;
 public interface HotelMinimumPriceRepository extends JpaRepository<HotelMinimumPrice, Long> {
 
     @Query("""
-            SELECT new com.project.airbnb_app.dto.HotelMinimumPriceDto(hmp.hotel, AVG(hmp.price))
+            SELECT new com.project.airbnb_app.dto.HotelMinimumPriceDto(hmp.hotel.id, hmp.hotel.name, AVG(hmp.price))
             FROM HotelMinimumPrice hmp
             WHERE hmp.hotel.city = :city
                 AND hmp.date between :startDate AND :endDate
                 AND hmp.hotel.active = true
-            Group by hmp.hotel
+            Group by hmp.hotel.id, hmp.hotel.name
             """
     )
     Page<HotelMinimumPriceDto> findHotelsByCityWithCheapestPrice(

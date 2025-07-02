@@ -11,12 +11,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-// Save the cheapest room price of hotel. To show the search UI with the minimum price like AirBnb or Oyo.
+
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @Table(name = "hotel_minimum_price")
+// Save the cheapest room price of hotel. To show the search UI with the minimum price like AirBnb or Oyo website
+// with calendar view with 90 days price.
 public class HotelMinimumPrice {
 
     @Id

@@ -1,7 +1,6 @@
 package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.dto.HotelDto;
-import com.project.airbnb_app.dto.HotelMinimumPriceDto;
 import com.project.airbnb_app.dto.request.HotelBookingRequest;
 import com.project.airbnb_app.dto.request.HotelSearchRequest;
 import com.project.airbnb_app.entity.RoomInventory;
@@ -16,8 +15,6 @@ public interface RoomInventoryService {
     void deleteInventoryByHotelIdAndRoomId(Long hotelId, Long roomId);
 
     Page<HotelDto> searchHotelsByCityAndAvailability(HotelSearchRequest hotelSearchRequest);
-
-    Page<HotelMinimumPriceDto> searchHotelsByCityWithMinimumPrice(HotelSearchRequest hotelSearchRequest);
 
     List<RoomInventory> updateReservedRoomsCount(HotelBookingRequest hotelBookingRequest);
 }

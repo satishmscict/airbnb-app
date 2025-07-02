@@ -2,6 +2,7 @@ package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.dto.HotelDto;
 import com.project.airbnb_app.dto.HotelMinimumPriceDto;
+import com.project.airbnb_app.dto.request.HotelMiniumPriceRequest;
 import com.project.airbnb_app.dto.request.HotelSearchRequest;
 import com.project.airbnb_app.entity.Hotel;
 import com.project.airbnb_app.entity.Room;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 public class HotelOrchestratorServiceImpl implements HotelOrchestratorService {
 
     private final HotelDomainService hotelDomainService;
+    private final HotelMinimPriceService hotelMinimPriceService;
     private final HotelService hotelService;
     private final ModelMapper modelMapper;
     private final RoomInventoryService roomInventoryService;
@@ -66,7 +68,7 @@ public class HotelOrchestratorServiceImpl implements HotelOrchestratorService {
     }
 
     @Override
-    public Page<HotelMinimumPriceDto> searchHotelsByCityWithMiniumPrice(HotelSearchRequest hotelSearchRequest) {
-        return roomInventoryService.searchHotelsByCityWithMinimumPrice(hotelSearchRequest);
+    public Page<HotelMinimumPriceDto> searchHotelsByCityWithMiniumPrice(HotelMiniumPriceRequest hotelMiniumPriceRequest) {
+        return hotelMinimPriceService.searchHotelsByCityWithMinimumPrice(hotelMiniumPriceRequest);
     }
 }

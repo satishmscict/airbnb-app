@@ -1,13 +1,11 @@
 package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.dto.HotelDto;
-import com.project.airbnb_app.dto.HotelMinimumPriceDto;
 import com.project.airbnb_app.dto.request.HotelBookingRequest;
 import com.project.airbnb_app.dto.request.HotelSearchRequest;
 import com.project.airbnb_app.entity.Hotel;
 import com.project.airbnb_app.entity.Room;
 import com.project.airbnb_app.entity.RoomInventory;
-import com.project.airbnb_app.repository.HotelMinimumPriceRepository;
 import com.project.airbnb_app.repository.RoomInventoryRepository;
 import jakarta.persistence.OptimisticLockException;
 import jakarta.transaction.Transactional;
@@ -36,8 +34,6 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
     private final ModelMapper modelMapper;
     private final RoomDomainService roomDomainService;
     private final RoomInventoryRepository roomInventoryRepository;
-
-    private final HotelMinimumPriceRepository hotelMinimumPriceRepository;
 
     private static RoomInventory buildInventory(Hotel hotel, Room room, LocalDate date) {
         return RoomInventory
@@ -85,26 +81,6 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
         log.debug("Total {} hotels found.", hotelsList.getContent().size());
 
         return hotelsList.map((element) -> modelMapper.map(element, HotelDto.class));
-    }
-
-    @Override
-    public Page<HotelMinimumPriceDto> searchHotelsByCityWithMinimumPrice(HotelSearchRequest hotelSearchRequest) {
-        log.debug("Find hotels with minimums price by city: {}, start date: {} and end date: {}.",
-                hotelSearchRequest.getCity(),
-                hotelSearchRequest.getStartDate(),
-                hotelSearchRequest.getEndDate()
-        );
-        Pageable pageable = PageRequest.of(hotelSearchRequest.getPageNo(), hotelSearchRequest.getPageSize());
-
-        Page<HotelMinimumPriceDto> hotelsList = hotelMinimumPriceRepository.findHotelsByCityWithCheapestPrice(
-                hotelSearchRequest.getCity(),
-                hotelSearchRequest.getStartDate(),
-                hotelSearchRequest.getEndDate(),
-                pageable
-        );
-        log.debug("Total {} hotel min prices found.", hotelsList.getContent().size());
-
-        return hotelsList;
     }
 
     @Transactional

@@ -95,7 +95,8 @@ public class PriceUpdateServiceImpl implements PriceUpdateService {
 
         List<HotelMinimumPrice> hotelMinimumPricesList = new ArrayList<>();
         minimumPricePerDayMap.forEach((localDate, roomPrice) -> {
-            HotelMinimumPrice hotelMinimumPrice = hotelMinimumPriceDomainService.findHotelByHotelAndDate(hotel, localDate).orElse(
+            HotelMinimumPrice hotelMinimumPrice = hotelMinimumPriceDomainService.findHotelByHotelAndDate(hotel, localDate)
+                    .orElse(
                             new HotelMinimumPrice(hotel, localDate)
                     );
 

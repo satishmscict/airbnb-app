@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
+@Table(name = "hotel_minium_price")
 public class HotelMinimumPrice {
 
     @Id
@@ -30,7 +31,7 @@ public class HotelMinimumPrice {
     private LocalDate date;
 
     @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal hotelMinimumPrice;
+    private BigDecimal price;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

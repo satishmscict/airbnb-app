@@ -66,7 +66,7 @@ public class HotelOrchestratorServiceImpl implements HotelOrchestratorService {
     }
 
     @Override
-    public Page<HotelMinimumPriceDto> searchHotelsByCityWithCheapestPrice(HotelSearchRequest hotelSearchRequest) {
-        return roomInventoryService.searchHotelsByCityWithCheapestPrice(hotelSearchRequest);
+    public Page<HotelMinimumPriceDto> searchHotelsByCityWithMiniumPrice(HotelSearchRequest hotelSearchRequest) {
+        return roomInventoryService.searchHotelsByCityWithMinimumPrice(hotelSearchRequest);
     }
 }

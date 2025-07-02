@@ -64,9 +64,9 @@ public class HotelController {
         return ResponseEntity.ok(hotelDto);
     }
 
-    @PostMapping("/searchWithMinimumPrice")
-    public ResponseEntity<Page<HotelMinimumPriceDto>> searchWithMinimumPrice(@Valid @RequestBody HotelSearchRequest hotelSearchRequest) {
-        Page<HotelMinimumPriceDto> hotelDto = hotelOrchestratorService.searchHotelsByCityWithCheapestPrice(hotelSearchRequest);
-        return ResponseEntity.ok(hotelDto);
+    @PostMapping("/search-with-minimum-price")
+    public ResponseEntity<Page<HotelMinimumPriceDto>> searchHotelsWithMinimumPrice(@Valid @RequestBody HotelSearchRequest hotelSearchRequest) {
+        Page<HotelMinimumPriceDto> hotels = hotelOrchestratorService.searchHotelsByCityWithMiniumPrice(hotelSearchRequest);
+        return ResponseEntity.ok(hotels);
     }
 }

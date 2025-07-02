@@ -13,5 +13,5 @@ public interface HotelOrchestratorService {
 
     Page<HotelDto> searchHotelsByCityAndAvailability(HotelSearchRequest hotelSearchRequest);
 
-    Page<HotelMinimumPriceDto> searchHotelsByCityWithCheapestPrice(HotelSearchRequest hotelSearchRequest);
+    Page<HotelMinimumPriceDto> searchHotelsByCityWithMiniumPrice(HotelSearchRequest hotelSearchRequest);
 }

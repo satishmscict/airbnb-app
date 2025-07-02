@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @RequiredArgsConstructor
-public class RoomUrgencyPricingDecorator implements RoomPricingStrategy {
+public class UrgencyPricingDecorator implements RoomPricingStrategy {
 
     private static final int URGENCY_DAYS_LIMIT = 7;
     private static final double URGENCY_MULTIPLIER = 1.15;

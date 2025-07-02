@@ -14,10 +14,10 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 @Repository
-public interface HotelMinPriceRepository extends JpaRepository<HotelMinimumPrice, Long> {
+public interface HotelMinimumPriceRepository extends JpaRepository<HotelMinimumPrice, Long> {
 
     @Query("""
-            SELECT new com.project.airbnb_app.dto.HotelMinimumPriceDto(hmp.hotel, AVG(hmp.hotelMinimumPrice))
+            SELECT new com.project.airbnb_app.dto.HotelMinimumPriceDto(hmp.hotel, AVG(hmp.price))
             FROM HotelMinimumPrice hmp
             WHERE hmp.hotel.city = :city
                 AND hmp.date between :startDate AND :endDate
@@ -32,5 +32,8 @@ public interface HotelMinPriceRepository extends JpaRepository<HotelMinimumPrice
             Pageable pageable
     );
 
-    Optional<HotelMinimumPrice> findHotelByHotelAndDate(Hotel hotel, LocalDate date);
+    Optional<HotelMinimumPrice> findHotelByHotelAndDate(
+            Hotel hotel,
+            LocalDate date
+    );
 }

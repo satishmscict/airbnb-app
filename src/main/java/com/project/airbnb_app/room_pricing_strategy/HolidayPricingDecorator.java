@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import java.math.BigDecimal;
 
 @RequiredArgsConstructor
-public class RoomHolidayPricingDecorator implements RoomPricingStrategy {
+public class HolidayPricingDecorator implements RoomPricingStrategy {
 
     private static final double HOLIDAY_MULTIPLIER = 1.25;
 

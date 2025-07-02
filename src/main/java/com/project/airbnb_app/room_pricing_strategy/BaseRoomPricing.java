@@ -4,7 +4,7 @@ import com.project.airbnb_app.entity.RoomInventory;
 
 import java.math.BigDecimal;
 
-public class RoomBasePricingStrategy implements RoomPricingStrategy {
+public class BaseRoomPricing implements RoomPricingStrategy {
 
     @Override
     public BigDecimal calculatePrice(RoomInventory roomInventory) {

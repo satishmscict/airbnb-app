@@ -17,7 +17,7 @@ public interface RoomInventoryService {
 
     Page<HotelDto> searchHotelsByCityAndAvailability(HotelSearchRequest hotelSearchRequest);
 
-    Page<HotelMinimumPriceDto> searchHotelsByCityWithCheapestPrice(HotelSearchRequest hotelSearchRequest);
+    Page<HotelMinimumPriceDto> searchHotelsByCityWithMinimumPrice(HotelSearchRequest hotelSearchRequest);
 
     List<RoomInventory> updateReservedRoomsCount(HotelBookingRequest hotelBookingRequest);
 }

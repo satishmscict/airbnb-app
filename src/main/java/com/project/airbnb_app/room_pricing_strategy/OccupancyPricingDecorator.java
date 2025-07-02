@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import java.math.BigDecimal;
 
 @RequiredArgsConstructor
-public class RoomOccupancyPricingDecorator implements RoomPricingStrategy {
+public class OccupancyPricingDecorator implements RoomPricingStrategy {
 
     private static final double OCCUPANCY_MULTIPLIER = 1.2;
 

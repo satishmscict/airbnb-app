@@ -3,10 +3,10 @@ package com.project.airbnb_app.service;
 import com.project.airbnb_app.entity.Hotel;
 import com.project.airbnb_app.entity.HotelMinimumPrice;
 import com.project.airbnb_app.entity.RoomInventory;
-import com.project.airbnb_app.repository.HotelMinPriceRepository;
+import com.project.airbnb_app.repository.HotelMinimumPriceRepository;
 import com.project.airbnb_app.repository.HotelRepository;
 import com.project.airbnb_app.repository.RoomInventoryRepository;
-import com.project.airbnb_app.room_pricing_strategy.RoomPricingCalculatorService;
+import com.project.airbnb_app.room_pricing_strategy.DynamicRoomPricingService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,10 +31,10 @@ public class PriceUpdateServiceImpl implements PriceUpdateService {
 
     private final int TOTAL_YEARS = 1;
 
-    private final HotelMinPriceRepository hotelMinPriceRepository;
+    private final HotelMinimumPriceRepository hotelMinimumPriceRepository;
     private final HotelRepository hotelRepository;
     private final RoomInventoryRepository roomInventoryRepository;
-    private final RoomPricingCalculatorService roomPricingCalculatorService;
+    private final DynamicRoomPricingService dynamicRoomPricingService;
 
     @Scheduled(cron = "0 0 * * * *")
     @Override
@@ -90,24 +90,24 @@ public class PriceUpdateServiceImpl implements PriceUpdateService {
 
         List<HotelMinimumPrice> hotelMinimumPricesList = new ArrayList<>();
         cheapestRoomPriceMap.forEach((localDate, roomPrice) -> {
-                    HotelMinimumPrice hotelMinimumPrice = hotelMinPriceRepository.findHotelByHotelAndDate(hotel, localDate).orElse(
+            HotelMinimumPrice hotelMinimumPrice = hotelMinimumPriceRepository.findHotelByHotelAndDate(hotel, localDate).orElse(
                             new HotelMinimumPrice(hotel, localDate)
                     );
 
-                    hotelMinimumPrice.setHotelMinimumPrice(roomPrice);
+            hotelMinimumPrice.setPrice(roomPrice);
                     // Prepare hotel min price list for bulk insert.
                     hotelMinimumPricesList.add(hotelMinimumPrice);
                 }
         );
 
-        hotelMinPriceRepository.saveAll(hotelMinimumPricesList);
+        hotelMinimumPriceRepository.saveAll(hotelMinimumPricesList);
         log.debug("Hotel minimum price updated for {} inventories.", hotelMinimumPricesList.size());
     }
 
     private void updateInventoryPrice(List<RoomInventory> roomInventoryList) {
         log.debug("Update inventory price started for {} inventories.", roomInventoryList.size());
         roomInventoryList.forEach(roomInventory -> {
-            BigDecimal dynamicPricing = roomPricingCalculatorService.calculateDynamicPricing(roomInventory);
+            BigDecimal dynamicPricing = dynamicRoomPricingService.calculateFinalPrice(roomInventory);
             roomInventory.setPrice(dynamicPricing);
         });
 

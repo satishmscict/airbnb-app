@@ -72,16 +72,25 @@ public class PriceUpdateServiceImpl implements PriceUpdateService {
         // Compute minimum price per day of hotel. Get the room with the cheapest price from available room types and perform dynamic price calculation.
         Map<LocalDate, BigDecimal> minimumPricePerDayMap = roomInventories.stream()
                 .collect(Collectors.groupingBy(
-                                RoomInventory::getDate,
-                                Collectors.mapping(RoomInventory::getPrice, Collectors.minBy(Comparator.naturalOrder()))
+                        RoomInventory::getDate,
+                        Collectors.collectingAndThen(
+                                Collectors.mapping(RoomInventory::getPrice, Collectors.minBy(Comparator.naturalOrder())),
+                                opt -> opt.orElse(BigDecimal.ZERO)
                         )
-                ).entrySet()
-                .stream()
-                .collect(
-                        Collectors.toMap(Map.Entry::getKey, v -> v.getValue().orElse(BigDecimal.ZERO))
-                );
+                ));
+        //        Map<LocalDate, BigDecimal> minimumPricePerDayMap = roomInventories.stream()
+//                .collect(Collectors.groupingBy(
+//                                RoomInventory::getDate,
+//                                Collectors.mapping(RoomInventory::getPrice, Collectors.minBy(Comparator.naturalOrder()))
+//                        )
+//                ).entrySet()
+//                .stream()
+//                .collect(
+//                        Collectors.toMap(Map.Entry::getKey, v -> v.getValue().orElse(BigDecimal.ZERO))
+//                );
 
-        log.debug("cheapest room price map is : {}", minimumPricePerDayMap);
+
+        log.debug("minimum room price map is : {}", minimumPricePerDayMap);
 
         List<HotelMinimumPrice> hotelMinimumPricesList = new ArrayList<>();
         minimumPricePerDayMap.forEach((localDate, roomPrice) -> {

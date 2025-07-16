@@ -44,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Long userId = jwtService.getUserIdFromAccessToken(authorizationHeader);
 
             // If user already available within a SecurityContextHolder, no need to check again.
-            if (SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 User user = appUserDomainService.findByIdOrNull(userId);
 
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(

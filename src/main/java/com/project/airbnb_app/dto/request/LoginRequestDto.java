@@ -10,6 +10,6 @@ public class LoginRequestDto {
     @Email(message = "Please enter valid email.")
     private String email;
 
-    @NotEmpty(message = "Please enter message.")
+    @NotEmpty(message = "Please enter valid password.")
     private String password;
 }

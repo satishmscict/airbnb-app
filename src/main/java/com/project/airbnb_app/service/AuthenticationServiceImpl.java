@@ -6,6 +6,7 @@ import com.project.airbnb_app.dto.request.LoginRequestDto;
 import com.project.airbnb_app.dto.request.SignupDto;
 import com.project.airbnb_app.entity.User;
 import com.project.airbnb_app.entity.enums.Role;
+import com.project.airbnb_app.exception.ResourceNotFoundException;
 import com.project.airbnb_app.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +38,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         if (user != null) {
             log.trace("User already exist with the email : {}", signupDto.getEmail());
-            throw new IllegalStateException("User already exist with the email id: " + signupDto.getEmail());
+            throw new ResourceNotFoundException("User already exist with the email id: " + signupDto.getEmail());
         }
 
         log.trace("User not exist and create new user with email: {}", signupDto.getEmail());

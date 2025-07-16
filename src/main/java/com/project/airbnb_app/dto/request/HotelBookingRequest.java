@@ -15,7 +15,7 @@ public class HotelBookingRequest {
     @NotNull(message = "Room id required.")
     private Long roomId;
 
-    //    @NotNull(message = "User details required.")
+    @NotNull(message = "User id required.")
 //    @JsonProperty("user")
 //    private UserDto user;
     private Long userId;

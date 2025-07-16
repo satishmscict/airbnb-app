@@ -73,7 +73,7 @@ public class JwtServiceImpl implements JwtService {
             token = token.split(TOKEN_PREFIX)[1];
         }
 
-        log.trace("Collect user id using the token.");
+        log.trace("Get the user id using token.");
         Claims claims = Jwts
                 .parser()
                 .setSigningKey(getSecretKey())

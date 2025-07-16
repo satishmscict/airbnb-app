@@ -10,7 +10,6 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -35,7 +34,7 @@ public class WebSecurityConfiguration {
                 .sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeHttpRequestsCustomizer ->
                         authorizeHttpRequestsCustomizer
-                                .requestMatchers("/api/v1/admin/**").hasAnyRole(Role.GUEST.name(), Role.HOTEL_MANAGER.name())
+                                .requestMatchers("/api/v1/admin/**").hasRole(Role.HOTEL_MANAGER.name())
                                 .requestMatchers("/api/v1/booking/**").authenticated()
                                 .anyRequest().permitAll()
                 )
@@ -61,11 +60,6 @@ public class WebSecurityConfiguration {
         return (request, response, authException) -> {
             handlerExceptionResolver.resolveException(request, response, null, authException);
         };
-    }
-
-    @Bean
-    BCryptPasswordEncoder getBCryptPasswordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
     @Bean

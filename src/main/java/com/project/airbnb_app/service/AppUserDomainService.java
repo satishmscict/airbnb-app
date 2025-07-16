@@ -1,14 +1,11 @@
 package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.entity.User;
-import com.project.airbnb_app.entity.enums.Role;
+import com.project.airbnb_app.exception.ResourceNotFoundException;
 import com.project.airbnb_app.repository.AppUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.EnumSet;
-import java.util.Set;
 
 @Service
 @Slf4j
@@ -16,21 +13,17 @@ import java.util.Set;
 public class AppUserDomainService {
     private final AppUserRepository appUserRepository;
 
-    User getAppUser() {
-        Set<Role> roleSet = EnumSet.of(Role.GUEST);
+    public User findByEmailOrNull(String email) {
+        return appUserRepository.findByEmail(email).orElse(null);
+    }
 
-        User user = appUserRepository.findById(1L).orElse(null);
-        if (user == null) {
-            user = User
-                    .builder()
-                    .email("satish@gmail.com")
-                    .name("Satish")
-                    .roles(roleSet)
-                    .password("sa@1234")
-                    .build();
-            user = appUserRepository.save(user);
-        }
+    public User findByIdOrNull(Long userId) {
+        return appUserRepository.findById(userId).orElse(null);
+    }
 
-        return user;
+    public User findByIdOrThrow(Long userId) {
+        return appUserRepository
+                .findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found the given id: " + userId));
     }
 }

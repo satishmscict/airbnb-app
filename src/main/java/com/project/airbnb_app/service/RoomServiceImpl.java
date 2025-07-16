@@ -25,6 +25,7 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public RoomDto createRoom(Long hotelId, RoomDto roomDto) {
         Hotel hotel = hotelDomainService.getHotelByIdAndIsActivated(hotelId);
+        hotelDomainService.validateHotelOwnership(hotel.getOwner().getId());
 
         log.debug("Convert RoomDto to Room and bind hotel to the room.");
         Room room = modelMapper.map(roomDto, Room.class);
@@ -51,6 +52,7 @@ public class RoomServiceImpl implements RoomService {
         }
 
         Room room = roomDomainService.getRoomById(hotelId, roomId);
+        hotelDomainService.validateHotelOwnership(room.getHotel().getOwner().getId());
 
         log.debug("Hotel and Room exist, continue deleting...");
         roomInventoryService.deleteInventoryByHotelIdAndRoomId(hotelId, room.getId());
@@ -76,6 +78,7 @@ public class RoomServiceImpl implements RoomService {
     public RoomDto updateRoomByHotelIdAndRoomId(Long hotelId, Long roomId, RoomDto roomDto) {
         log.debug("Start update room by hotel id: {} and room id: {}.", hotelId, roomId);
         Hotel hotel = hotelDomainService.getHotelByIdAndIsActivated(hotelId);
+        hotelDomainService.validateHotelOwnership(hotel.getOwner().getId());
 
         log.debug("Updating RoomDto.");
         roomDto.setId(roomId);

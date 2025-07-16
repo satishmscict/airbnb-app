@@ -1,0 +1,25 @@
+#debug: false
+server:
+  port: 8080
+spring:
+  application:
+    name: airbnb-app
+  datasource:
+    url: jdbc:postgresql://localhost:5432/air_bnb_db
+    username: postgres
+    password: aaqwe123@P
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        #dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: true
+security:
+  jwt:
+    secret-key: fdfedece-f45e-445e-8e54-69d781bdb0a2
+    access-token-expiration-time: 900000 # 15 minutes in milliseconds
+    refresh-token-expiration-time: 7889238000 # 3 months in milliseconds
+current:
+  environment: development

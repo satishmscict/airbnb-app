@@ -1,8 +1,6 @@
 package com.project.airbnb_app.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.project.airbnb_app.dto.UserDto;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -17,9 +15,10 @@ public class HotelBookingRequest {
     @NotNull(message = "Room id required.")
     private Long roomId;
 
-    @NotNull(message = "User details required.")
-    @JsonProperty("user")
-    private UserDto user;
+    @NotNull(message = "User id required.")
+//    @JsonProperty("user")
+//    private UserDto user;
+    private Long userId;
 
     @NotNull(message = "Expected rooms count for booking is required.")
     private Integer bookedRoomsCount;

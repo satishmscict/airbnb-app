@@ -6,17 +6,20 @@ import com.project.airbnb_app.dto.request.HotelBookingRequest;
 import com.project.airbnb_app.entity.*;
 import com.project.airbnb_app.entity.enums.BookingStatus;
 import com.project.airbnb_app.exception.ResourceNotFoundException;
+import com.project.airbnb_app.exception.UnAuthorizationException;
 import com.project.airbnb_app.repository.HotelBookingRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -86,7 +89,14 @@ public class HotelBookingServiceImpl implements HotelBookingService {
                 hotelBookingRequest.getHotelId()
         );
 
-        User user = appUserDomainService.getAppUser();
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!Objects.equals(hotelBookingRequest.getUserId(), user.getId())) {
+            throw new UnAuthorizationException("Booking does not belongs to the user id: " + hotelBookingRequest.getUserId());
+        }
+
+        BigDecimal totalPrice = roomInventoryList.stream()
+                .map(RoomInventory::getPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         log.debug("Booking object preparing....");
         HotelBooking hotelBooking = HotelBooking.builder()
@@ -97,7 +107,7 @@ public class HotelBookingServiceImpl implements HotelBookingService {
                 .checkInDate(hotelBookingRequest.getCheckInDate())
                 .checkOutDate(hotelBookingRequest.getCheckOutDate())
                 .roomsCount(hotelBookingRequest.getBookedRoomsCount())
-                .amount(BigDecimal.TEN)
+                .amount(totalPrice)
                 .build();
 
         HotelBooking savedHotelBooking = hotelBookingRepository.save(hotelBooking);

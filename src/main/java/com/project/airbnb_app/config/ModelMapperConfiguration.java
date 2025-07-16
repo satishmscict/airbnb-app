@@ -20,7 +20,7 @@ public class ModelMapperConfiguration {
         Converter<User, UserDto> userToUserDtoConverter = ctx -> {
             User source = ctx.getSource();
             if (source == null) return null;
-            return new UserDto(source.getId(), source.getName(), source.getEmail(), source.getPassword(), source.getRoles());
+            return new UserDto(source.getId(), source.getName(), source.getEmail(), source.getRoles());
         };
         modelMapper.typeMap(User.class, UserDto.class).setConverter(userToUserDtoConverter);
 

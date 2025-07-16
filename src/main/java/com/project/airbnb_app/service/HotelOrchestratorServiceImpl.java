@@ -47,6 +47,7 @@ public class HotelOrchestratorServiceImpl implements HotelOrchestratorService {
     public String deleteHotelWithDependencies(Long hotelId) {
         log.debug("Fetch hotel details with the id: {}.", hotelId);
         Hotel hotel = hotelDomainService.getHotelById(hotelId);
+        hotelDomainService.validateHotelOwnership(hotel.getOwner().getId());
 
         log.debug("Hotel found with the id {} and total {} rooms, now need to delete inventory of each room.", hotelId, hotel.getRooms().size());
         for (Room room : hotel.getRooms()) {

@@ -1,12 +1,15 @@
 package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.entity.Hotel;
+import com.project.airbnb_app.entity.User;
 import com.project.airbnb_app.exception.ResourceNotFoundException;
+import com.project.airbnb_app.exception.UnAuthorizationException;
 import com.project.airbnb_app.repository.HotelRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 // Don’t need to create an interface and a separate implementation class.
@@ -23,6 +26,8 @@ public class HotelDomainService {
                 .findById(hotelId)
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel not found with the id: " + hotelId));
         log.debug("Hotel found with the id {} and name {}.", hotelId, hotel.getName());
+
+        validateHotelOwnership(hotel.getOwner().getId());
 
         return hotel;
     }
@@ -47,5 +52,13 @@ public class HotelDomainService {
 
     Boolean isHotelExistById(Long hotelId) {
         return hotelRepository.existsById(hotelId);
+    }
+
+    public void validateHotelOwnership(Long ownerId) {
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (!currentUser.getId().equals(ownerId)) {
+            throw new UnAuthorizationException("User does not own this hotel.");
+        }
     }
 }

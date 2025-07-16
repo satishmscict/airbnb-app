@@ -4,10 +4,13 @@ import com.project.airbnb_app.dto.HotelAndRoomsDto;
 import com.project.airbnb_app.dto.HotelDto;
 import com.project.airbnb_app.dto.RoomDto;
 import com.project.airbnb_app.entity.Hotel;
+import com.project.airbnb_app.entity.User;
+import com.project.airbnb_app.exception.ResourceNotFoundException;
 import com.project.airbnb_app.repository.HotelRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,6 +29,9 @@ public class HotelServiceImpl implements HotelService {
         log.debug("Save hotel with the name: {}.", hotelDto.getName());
         Hotel toHotel = modelMapper.map(hotelDto, Hotel.class);
         toHotel.setActive(false);
+
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        toHotel.setOwner(user);
 
         Hotel savedHotel = hotelRepository.save(toHotel);
         log.debug("Hotel saved with the id {}.", savedHotel.getId());
@@ -77,6 +83,12 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     public void deleteHotel(Long hotelId) {
+        Hotel hotel = hotelRepository.findById(hotelId).orElse(null);
+        if (hotel == null) {
+            throw new ResourceNotFoundException("Hotel not found with the id: " + hotelId);
+        }
+
+        hotelDomainService.validateHotelOwnership(hotel.getOwner().getId());
         hotelRepository.deleteById(hotelId);
     }
 

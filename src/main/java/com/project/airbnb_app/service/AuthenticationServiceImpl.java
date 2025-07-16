@@ -6,12 +6,13 @@ import com.project.airbnb_app.dto.request.LoginRequestDto;
 import com.project.airbnb_app.dto.request.SignupDto;
 import com.project.airbnb_app.entity.User;
 import com.project.airbnb_app.entity.enums.Role;
-import com.project.airbnb_app.exception.ResourceNotFoundException;
-import com.project.airbnb_app.exception.UnAuthorizationException;
 import com.project.airbnb_app.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,9 +23,10 @@ import java.util.Set;
 @Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService {
 
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final AuthenticationManager authenticationManager;
     private final AppUserDomainService appUserDomainService;
     private final AppUserService appUserService;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JwtService jwtService;
     private final ModelMapper modelMapper;
 
@@ -63,17 +65,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public LoginResponseDto signInUser(LoginRequestDto loginRequestDto) {
-        User user = appUserDomainService.findByEmailOrNull(
-                loginRequestDto.getEmail()
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+                loginRequestDto.getEmail(),
+                loginRequestDto.getPassword()
         );
-        if (user == null) {
-            throw new ResourceNotFoundException("User not found with the email: " + loginRequestDto.getEmail());
-        }
+        Authentication authentication = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
 
-        if (!bCryptPasswordEncoder.matches(loginRequestDto.getPassword(), user.getPassword())) {
-            throw new UnAuthorizationException("Invalid password.");
-        }
-
+        User user = (User) authentication.getPrincipal();
         String accessToken = jwtService.createAccessToken(user);
         String refreshToken = jwtService.createRefreshToken(user);
 

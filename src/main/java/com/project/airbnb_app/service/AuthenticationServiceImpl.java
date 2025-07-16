@@ -24,9 +24,9 @@ import java.util.Set;
 @Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService {
 
-    private final AuthenticationManager authenticationManager;
     private final AppUserDomainService appUserDomainService;
     private final AppUserService appUserService;
+    private final AuthenticationManager authenticationManager;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JwtService jwtService;
     private final ModelMapper modelMapper;

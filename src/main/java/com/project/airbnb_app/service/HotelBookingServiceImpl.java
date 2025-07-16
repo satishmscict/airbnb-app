@@ -56,6 +56,12 @@ public class HotelBookingServiceImpl implements HotelBookingService {
                 .findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel booking not found with the id: " + bookingId));
 
+        //TODO: implement DRY
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!Objects.equals(hotelBooking.getUser().getId(), user.getId())) {
+            throw new UnAuthorizationException("Booking does not belongs to the user id: " + user.getId());
+        }
+
         if (isBookingExpired(hotelBooking.getCreatedAt())) {
             throw new IllegalStateException("Hotel booking has expired. Please initiate a new booking.");
         }

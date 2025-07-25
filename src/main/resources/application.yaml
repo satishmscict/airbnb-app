@@ -23,3 +23,6 @@ security:
     refresh-token-expiration-time: 7889238000 # 3 months in milliseconds
 current:
   environment: development
+stripe:
+  frontEndBaseUrl: http://localhost:8080
+  secretKey: sk_test_51RoQyaJHXuvK1T60JLKBoJGe24gZAiMmc5ypf9U4Lxw3BL7RYFZ4uq7ioUkUmWQjjFSIiYze6TOZLdoaURthk9ds00KR23zFmd

@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -29,12 +30,16 @@ public class HotelBookingServiceImpl implements HotelBookingService {
     private static final int BOOKING_EXPIRED_MINUTES = 10;
 
     private final AppUserDomainService appUserDomainService;
+    private final CheckoutService checkoutService;
     private final HotelBookingRepository hotelBookingRepository;
     private final HotelDomainService hotelDomainService;
     private final GuestService guestService;
     private final ModelMapper modelMapper;
     private final RoomDomainService roomDomainService;
     private final RoomInventoryService roomInventoryService;
+
+    @Value("${stripe.frontEndBaseUrl}")
+    private String paymentGatewayRedirectBaseUrl;
 
     private static void validateBookingStatus(HotelBooking hotelBooking) {
         switch (hotelBooking.getBookingStatus()) {
@@ -120,6 +125,54 @@ public class HotelBookingServiceImpl implements HotelBookingService {
         log.debug("Hotel booking object prepared and saved with the id : {}", savedHotelBooking.getId());
 
         return modelMapper.map(savedHotelBooking, HotelBookingDto.class);
+    }
+
+    @Override
+    public String initiatePayment(Long bookingId) {
+        log.debug("Start initiate payment.");
+        HotelBooking hotelBooking = hotelBookingRepository.findById(bookingId)
+                .orElseThrow(() -> {
+                    String errorMessage = String.format("Booking not found with the id: %s", bookingId);
+                    log.error(errorMessage);
+                    return new ResourceNotFoundException(errorMessage);
+                });
+
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!Objects.equals(hotelBooking.getUser().getId(), user.getId())) {
+            String errorMessage = String.format("Booking does not belongs to the user id: %s", hotelBooking.getUser().getId());
+            log.error(errorMessage);
+            throw new UnAuthorizationException(errorMessage);
+        }
+
+        if (isBookingExpired(hotelBooking.getCreatedAt())) {
+            throw new IllegalStateException("Hotel booking has expired. Please initiate a new booking.");
+        }
+
+        log.debug("Prepare the stripe payment request object and get the payment session url.");
+        String paymentSessionUrl = checkoutService.getCheckoutSession(
+                hotelBooking,
+                String.format("%s/payments/payment-success.html?user=%s&hotel=%s&room=%s&amount=%s&success=true",
+                        paymentGatewayRedirectBaseUrl,
+                        user.getName(),
+                        hotelBooking.getHotel().getName(),
+                        hotelBooking.getRoom().getType(),
+                        hotelBooking.getAmount().toString()
+                ),
+                String.format("%s/payments/payment-cancel.html?user=%s&hotel=%s&room=%s&amount=%s",
+                        paymentGatewayRedirectBaseUrl,
+                        user.getName(),
+                        hotelBooking.getHotel().getName(),
+                        hotelBooking.getRoom().getType(),
+                        hotelBooking.getAmount().toString()
+                ));
+        log.debug("Payment session created for booking id: {}", bookingId);
+
+        log.debug("Update the payment status to PAYMENT_PENDING for the booking id: {}", bookingId);
+        hotelBooking.setBookingStatus(BookingStatus.PAYMENT_PENDING);
+        hotelBookingRepository.save(hotelBooking);
+        log.debug("Successfully update the booking status to PAYMENT_PENDING for the booking id: {}", bookingId);
+
+        return paymentSessionUrl;
     }
 
     private Boolean isBookingExpired(LocalDateTime bookingStartDate) {

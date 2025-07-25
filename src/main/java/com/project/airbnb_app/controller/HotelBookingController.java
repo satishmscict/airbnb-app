@@ -10,12 +10,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,11 +23,11 @@ public class HotelBookingController {
 
     private final HotelBookingService hotelBookingService;
 
-    @PostMapping("/guests")
-    ResponseEntity<List<GuestDto>> addGuestsToBooking(@RequestBody GuestCreateDto guestCreate) {
+    @PostMapping("/{bookingId}/guests")
+    ResponseEntity<List<GuestDto>> addGuestsToBooking(@PathVariable Long bookingId, @RequestBody GuestCreateDto guestCreate) {
         return new ResponseEntity<>(
                 hotelBookingService.addGuestsToBooking(
-                        guestCreate.getBookingId(),
+                        bookingId,
                         guestCreate.getGuest()
                 ),
                 HttpStatus.CREATED
@@ -40,5 +38,11 @@ public class HotelBookingController {
     public ResponseEntity<HotelBookingDto> createBooking(@Valid @RequestBody HotelBookingRequest hotelBookingRequest) {
         HotelBookingDto hotelBookingDto = hotelBookingService.createHotelBooking(hotelBookingRequest);
         return new ResponseEntity<>(hotelBookingDto, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{bookingId}/initPayment")
+    public ResponseEntity<Map<String, String>> initiatePayment(@PathVariable Long bookingId) {
+        String paymentSessionUrl = hotelBookingService.initiatePayment(bookingId);
+        return ResponseEntity.ok(Map.of("paymentSessionUrl", paymentSessionUrl));
     }
 }

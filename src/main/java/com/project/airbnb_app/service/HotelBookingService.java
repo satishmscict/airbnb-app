@@ -11,4 +11,6 @@ public interface HotelBookingService {
     List<GuestDto> addGuestsToBooking(Long bookingId, List<GuestDto> guestList);
 
     HotelBookingDto createHotelBooking(HotelBookingRequest hotelBookingRequest);
+
+    String initiatePayment(Long bookingId);
 }

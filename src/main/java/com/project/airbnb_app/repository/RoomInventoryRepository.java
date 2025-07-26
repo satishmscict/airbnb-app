@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -16,6 +17,40 @@ import java.util.List;
 
 @Repository
 public interface RoomInventoryRepository extends JpaRepository<RoomInventory, Long> {
+
+    @Modifying
+    @Query("""
+            UPDATE RoomInventory ri
+            SET ri.reservedRoomsCount = ri.reservedRoomsCount - :roomsCount,
+                ri.bookedRoomsCount = ri.bookedRoomsCount + :roomsCount
+            WHERE ri.room.id = :roomId
+               AND ri.date between :startDate and :endDate
+               AND (ri.totalRoomsCount - ri.bookedRoomsCount) >= :roomsCount
+               AND ri.reservedRoomsCount >= :roomsCount
+               AND ri.closed = false
+            """)
+    void confirmBooking(
+            @Param("roomId") Long roomId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("roomsCount") Integer roomsCount
+    );
+
+    @Modifying
+    @Query("""
+            UPDATE RoomInventory ri
+            SET ri.bookedRoomsCount = ri.bookedRoomsCount - :roomsCount
+            WHERE ri.room.id = :roomId
+               AND ri.date between :startDate and :endDate
+               AND (ri.totalRoomsCount - ri.bookedRoomsCount) >= :roomsCount
+               AND ri.closed = false
+            """)
+    void cancelBooking(
+            @Param("roomId") Long roomId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("roomsCount") Integer roomsCount
+    );
 
     void deleteAllByHotelIdAndRoomId(Long hotelId, Long roomId);
 
@@ -29,6 +64,22 @@ public interface RoomInventoryRepository extends JpaRepository<RoomInventory, Lo
             """)
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<RoomInventory> findAndLockAvailableInventory(
+            @Param("roomId") Long roomId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("roomsCount") Integer roomsCount
+    );
+
+    @Query("""
+            SELECT ri
+            FROM RoomInventory ri
+            WHERE ri.room.id = :roomId
+               AND ri.date between :startDate and :endDate
+               AND ri.closed = false
+               AND (ri.totalRoomsCount - ri.bookedRoomsCount) >= :roomsCount
+            """)
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<RoomInventory> findAndLockReserveInventory(
             @Param("roomId") Long roomId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
@@ -59,5 +110,21 @@ public interface RoomInventoryRepository extends JpaRepository<RoomInventory, Lo
             @Param("roomsCount") Integer roomsCount,
             @Param("daysCount") Long daysCount,
             Pageable pageable
+    );
+
+    @Modifying
+    @Query("""
+                UPDATE RoomInventory ri
+                SET ri.reservedRoomsCount = ri.reservedRoomsCount + :numberOfRooms
+                WHERE ri.room.id = :roomId
+                  AND ri.date BETWEEN :startDate AND :endDate
+                  AND (ri.totalRoomsCount - ri.bookedRoomsCount - ri.reservedRoomsCount) >= :numberOfRooms
+                  AND ri.closed = false
+            """)
+    void initBooking(
+            @Param("roomId") Long roomId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("numberOfRooms") int numberOfRooms
     );
 }

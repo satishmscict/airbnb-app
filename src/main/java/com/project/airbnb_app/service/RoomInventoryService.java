@@ -6,13 +6,20 @@ import com.project.airbnb_app.dto.request.HotelSearchRequest;
 import com.project.airbnb_app.entity.RoomInventory;
 import org.springframework.data.domain.Page;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface RoomInventoryService {
 
+    void cancelBooking(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount);
+
+    void confirmBooking(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount);
+
     void createInventory(Long hotelId, Long roomId);
 
     void deleteInventoryByHotelIdAndRoomId(Long hotelId, Long roomId);
+
+    void findAndLockReserveInventory(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount);
 
     void saveAll(List<RoomInventory> roomInventories);
 

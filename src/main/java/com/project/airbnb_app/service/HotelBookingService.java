@@ -1,23 +1,12 @@
 package com.project.airbnb_app.service;
 
-import com.project.airbnb_app.dto.GuestDto;
-import com.project.airbnb_app.dto.HotelBookingDto;
-import com.project.airbnb_app.dto.request.HotelBookingRequest;
-import com.stripe.model.Event;
-
-import java.util.List;
+import com.project.airbnb_app.entity.HotelBooking;
 
 public interface HotelBookingService {
 
-    List<GuestDto> addGuestsToBooking(Long bookingId, List<GuestDto> guestDtoList);
-
-    void cancelBooking(Long bookingId);
-
-    void capturePaymentEvent(Event event);
-
-    HotelBookingDto createHotelBooking(HotelBookingRequest hotelBookingRequest);
+    HotelBooking findByPaymentSessionId(String paymentSessionId);
 
     String getBookingStatus(Long bookingId);
 
-    String initiatePayment(Long bookingId);
+    void saveBooking(HotelBooking hotelBooking);
 }

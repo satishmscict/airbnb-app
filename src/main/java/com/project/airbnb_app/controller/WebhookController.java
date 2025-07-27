@@ -1,6 +1,6 @@
 package com.project.airbnb_app.controller;
 
-import com.project.airbnb_app.service.HotelBookingService;
+import com.project.airbnb_app.service.CheckoutService;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.model.Event;
 import com.stripe.net.Webhook;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class WebhookController {
 
-    private final HotelBookingService hotelBookingService;
+    private final CheckoutService checkoutService;
 
     @Value("${stripe.webhook.secretKey}")
     private String webHookSecret;
@@ -28,7 +28,7 @@ public class WebhookController {
     ) {
         try {
             Event event = Webhook.constructEvent(payload, stripeSignatureHeader, webHookSecret);
-            hotelBookingService.capturePaymentEvent(event);
+            checkoutService.capturePaymentEvent(event);
 
             return ResponseEntity.noContent().build();
         } catch (SignatureVerificationException e) {

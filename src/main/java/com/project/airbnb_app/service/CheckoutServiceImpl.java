@@ -2,11 +2,14 @@ package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.entity.HotelBooking;
 import com.project.airbnb_app.entity.User;
+import com.project.airbnb_app.entity.enums.BookingStatus;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Customer;
+import com.stripe.model.Event;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.CustomerCreateParams;
 import com.stripe.param.checkout.SessionCreateParams;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,10 +24,13 @@ public class CheckoutServiceImpl implements CheckoutService {
 
     private static final String CURRENCY_INR = "INR";
     private static final int CURRENCY_UNIT = 100;
+    private static final String STRIPE_EVENT_CHECKOUT_SESSION_COMPLETED = "checkout.session.completed";
+    private final HotelBookingService hotelBookingService;
+
     private final AppUserDomainService appUserDomainService;
+    private final RoomInventoryService roomInventoryService;
     @Value("${stripe.frontEndBaseUrl}")
     private String paymentGatewayRedirectBaseUrl;
-    private final HotelBookingOrchestratorService hotelBookingOrchestratorService;
 
     @Override
     public String createCheckoutSession(HotelBooking hotelBooking) {
@@ -66,7 +72,7 @@ public class CheckoutServiceImpl implements CheckoutService {
             session = Session.create(sessionCreateParams);
 
             hotelBooking.setPaymentSessionId(session.getId());
-            hotelBookingOrchestratorService.save(hotelBooking);
+            hotelBookingService.saveBooking(hotelBooking);
 
         } catch (StripeException e) {
             log.error("Failed to create the payment session. Error info: {}", e.getMessage());
@@ -74,6 +80,39 @@ public class CheckoutServiceImpl implements CheckoutService {
         }
 
         return session.getUrl();
+    }
+
+    @Transactional
+    @Override
+    public void capturePaymentEvent(Event event) {
+        if (event.getType().equals(STRIPE_EVENT_CHECKOUT_SESSION_COMPLETED)) {
+            Session session = (Session) event.getDataObjectDeserializer().getObject().orElse(null);
+            if (session == null) return;
+
+            HotelBooking hotelBooking = hotelBookingService.findByPaymentSessionId(session.getId());
+
+            hotelBooking.setBookingStatus(BookingStatus.CONFIRMED);
+            hotelBookingService.saveBooking(hotelBooking);
+
+            // To avoid concurrent modification.
+            roomInventoryService.findAndLockInventoryForModification(
+                    hotelBooking.getRoom().getId(),
+                    hotelBooking.getCheckInDate().toLocalDate(),
+                    hotelBooking.getCheckOutDate().toLocalDate(),
+                    hotelBooking.getRoomsCount()
+            );
+
+            roomInventoryService.confirmBooking(
+                    hotelBooking.getRoom().getId(),
+                    hotelBooking.getCheckInDate().toLocalDate(),
+                    hotelBooking.getCheckOutDate().toLocalDate(),
+                    hotelBooking.getRoomsCount()
+            );
+
+            log.info("Successfully completed booking for the id: {}", hotelBooking.getId());
+        } else {
+            log.debug("Unhandled event type : {}", event.getType());
+        }
     }
 
     private String buildFailureUrl(String amount, String hotelName, String roomType, String username) {

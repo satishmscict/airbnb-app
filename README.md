@@ -33,3 +33,7 @@ creation, and guest management. The API is developed following clean code practi
 ### ✅ **Database Diagram**
 
 ![img.png](database-view.png)
+
+### **Reference links**
+
+- https://stackoverflow.com/questions/66662013/stripe-login-zsh-command-not-found-stripe (Stripe CLI installation fix)

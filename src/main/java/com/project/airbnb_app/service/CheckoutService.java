@@ -4,5 +4,5 @@ import com.project.airbnb_app.entity.HotelBooking;
 
 public interface CheckoutService {
 
-    String getCheckoutSession(HotelBooking hotelBooking, String successUrl, String failureUrl);
+    String createCheckoutSession(HotelBooking hotelBooking);
 }

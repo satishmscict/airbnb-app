@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class WebhookController {
 
     private final HotelBookingService hotelBookingService;
+
     @Value("${stripe.webhook.secretKey}")
     private String webHookSecret;
 

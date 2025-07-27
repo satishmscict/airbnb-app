@@ -52,16 +52,6 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
     }
 
     @Override
-    public void cancelBooking(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount) {
-        roomInventoryRepository.cancelBooking(
-                roomId,
-                checkInDate,
-                checkOutDate,
-                roomsCount
-        );
-    }
-
-    @Override
     public void confirmBooking(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount) {
         roomInventoryRepository.confirmBooking(roomId, checkInDate, checkOutDate, roomsCount);
     }
@@ -97,9 +87,19 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
     }
 
     @Override
-    public void findAndLockReserveInventory(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount) {
-        roomInventoryRepository.findAndLockReserveInventory(
+    public void findAndLockInventoryForModification(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount) {
+        roomInventoryRepository.findAndLockInventoryForModification(
                 roomId, checkInDate, checkOutDate, roomsCount
+        );
+    }
+
+    @Override
+    public void releaseBookedRooms(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount) {
+        roomInventoryRepository.releaseBookedRooms(
+                roomId,
+                checkInDate,
+                checkOutDate,
+                roomsCount
         );
     }
 
@@ -137,7 +137,7 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
     public List<RoomInventory> updateReservedRoomsCount(HotelBookingRequest hotelBookingRequest) {
         List<RoomInventory> roomInventoryList = findAndLockAvailableInventory(hotelBookingRequest);
 
-        roomInventoryRepository.initBooking(
+        roomInventoryRepository.reserveRooms(
                 hotelBookingRequest.getRoomId(),
                 hotelBookingRequest.getCheckInDate().toLocalDate(),
                 hotelBookingRequest.getCheckOutDate().toLocalDate(),

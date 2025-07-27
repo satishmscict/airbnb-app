@@ -10,7 +10,6 @@ import com.project.airbnb_app.repository.HotelRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,6 +19,7 @@ import java.util.List;
 @Slf4j
 public class HotelServiceImpl implements HotelService {
 
+    private final AppUserDomainService appUserDomainService;
     private final HotelDomainService hotelDomainService;
     private final HotelRepository hotelRepository;
     private final ModelMapper modelMapper;
@@ -30,7 +30,7 @@ public class HotelServiceImpl implements HotelService {
         Hotel toHotel = modelMapper.map(hotelDto, Hotel.class);
         toHotel.setActive(false);
 
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = appUserDomainService.getCurrentUser();
         toHotel.setOwner(user);
 
         Hotel savedHotel = hotelRepository.save(toHotel);

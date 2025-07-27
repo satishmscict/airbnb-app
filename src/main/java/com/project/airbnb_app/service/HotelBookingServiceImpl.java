@@ -19,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -112,14 +111,14 @@ public class HotelBookingServiceImpl implements HotelBookingService {
         hotelBooking.setBookingStatus(BookingStatus.CANCELLED);
         hotelBookingRepository.save(hotelBooking);
 
-        roomInventoryService.findAndLockReserveInventory(
+        roomInventoryService.findAndLockInventoryForModification(
                 hotelBooking.getRoom().getId(),
                 hotelBooking.getCheckInDate().toLocalDate(),
                 hotelBooking.getCheckOutDate().toLocalDate(),
                 hotelBooking.getRoomsCount()
         );
 
-        roomInventoryService.cancelBooking(
+        roomInventoryService.releaseBookedRooms(
                 hotelBooking.getRoom().getId(),
                 hotelBooking.getCheckInDate().toLocalDate(),
                 hotelBooking.getCheckOutDate().toLocalDate(),
@@ -140,7 +139,7 @@ public class HotelBookingServiceImpl implements HotelBookingService {
     }
 
     private void isBookingBelongsToCurrentUser(Long userId) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = appUserDomainService.getCurrentUser();
         if (!Objects.equals(userId, user.getId())) {
             throw new UnAuthorizationException("Booking does not belongs to the user id: " + user.getId());
         }
@@ -164,7 +163,7 @@ public class HotelBookingServiceImpl implements HotelBookingService {
             hotelBookingRepository.save(hotelBooking);
 
             // To avoid concurrent modification.
-            roomInventoryService.findAndLockReserveInventory(
+            roomInventoryService.findAndLockInventoryForModification(
                     hotelBooking.getRoom().getId(),
                     hotelBooking.getCheckInDate().toLocalDate(),
                     hotelBooking.getCheckOutDate().toLocalDate(),
@@ -203,7 +202,7 @@ public class HotelBookingServiceImpl implements HotelBookingService {
                 hotelBookingRequest.getHotelId()
         );
 
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = appUserDomainService.getCurrentUser();
         if (!Objects.equals(hotelBookingRequest.getUserId(), user.getId())) {
             throw new UnAuthorizationException("Booking does not belongs to the user id: " + hotelBookingRequest.getUserId());
         }
@@ -253,7 +252,7 @@ public class HotelBookingServiceImpl implements HotelBookingService {
                     return new ResourceNotFoundException(errorMessage);
                 });
 
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = appUserDomainService.getCurrentUser();
         if (!Objects.equals(hotelBooking.getUser().getId(), user.getId())) {
             String errorMessage = String.format("Booking does not belongs to the user id: %s", hotelBooking.getUser().getId());
             log.error(errorMessage);
@@ -265,22 +264,7 @@ public class HotelBookingServiceImpl implements HotelBookingService {
         }
 
         log.debug("Prepare the stripe payment request object and get the payment session url.");
-        String paymentSessionUrl = checkoutService.getCheckoutSession(
-                hotelBooking,
-                String.format("%s/payments/payment-success.html?user=%s&hotel=%s&room=%s&amount=%s&success=true",
-                        paymentGatewayRedirectBaseUrl,
-                        user.getName(),
-                        hotelBooking.getHotel().getName(),
-                        hotelBooking.getRoom().getType(),
-                        hotelBooking.getAmount().toString()
-                ),
-                String.format("%s/payments/payment-cancel.html?user=%s&hotel=%s&room=%s&amount=%s",
-                        paymentGatewayRedirectBaseUrl,
-                        user.getName(),
-                        hotelBooking.getHotel().getName(),
-                        hotelBooking.getRoom().getType(),
-                        hotelBooking.getAmount().toString()
-                ));
+        String paymentSessionUrl = checkoutService.createCheckoutSession(hotelBooking);
         log.debug("Payment session created for booking id: {}", bookingId);
 
         log.debug("Update the payment status to PAYMENT_PENDING for the booking id: {}", bookingId);

@@ -7,7 +7,6 @@ import com.project.airbnb_app.repository.GuestRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +16,7 @@ import java.util.List;
 @Slf4j
 public class GuestServiceImpl implements GuestService {
 
+    private final AppUserDomainService appUserDomainService;
     private final GuestRepository guestRepository;
     private final ModelMapper modelMapper;
 
@@ -24,7 +24,7 @@ public class GuestServiceImpl implements GuestService {
     public List<GuestDto> addGuests(List<GuestDto> guestDtoList) {
         log.debug("Add guest started with {} guests.", guestDtoList.size());
 
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = appUserDomainService.getCurrentUser();
 
         List<Guest> guestList = guestDtoList
                 .stream()

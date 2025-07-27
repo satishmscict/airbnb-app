@@ -18,7 +18,7 @@ spring:
     show-sql: true
 security:
   jwt:
-    secret-key: fdfedece-f45e-445e-8e54-69d781bdb0a2
+    secret-key: ${JWT_SECRET}
     access-token-expiration-time: 900000 # 15 minutes in milliseconds
     refresh-token-expiration-time: 7889238000 # 3 months in milliseconds
 current:

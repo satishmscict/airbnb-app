@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestratorService {
 
     private final AppUserDomainService appUserDomainService;
-    private final CheckoutService checkoutService;
     private final DynamicRoomPricingService dynamicRoomPricingService;
     private final GuestDomainService guestDomainService;
     private final GuestService guestService;
@@ -34,6 +33,7 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
     private final HotelBookingRepository hotelBookingRepository;
     private final HotelDomainService hotelDomainService;
     private final ModelMapper modelMapper;
+    private final PaymentGatewayService paymentGatewayService;
     private final RoomDomainService roomDomainService;
     private final RoomInventoryService roomInventoryService;
 
@@ -94,7 +94,7 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
                 hotelBooking.getRoomsCount()
         );
 
-        checkoutService.processRefundAmount(hotelBooking);
+        paymentGatewayService.processRefundAmount(hotelBooking);
     }
 
     @Transactional
@@ -157,7 +157,7 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
         hotelBookingDomainService.validateBookingNotExpired(hotelBooking.getCreatedAt());
 
         log.debug("Prepare the stripe payment request object and get the payment session url.");
-        String paymentSessionUrl = checkoutService.createCheckoutSession(hotelBooking);
+        String paymentSessionUrl = paymentGatewayService.createCheckoutSession(hotelBooking);
         log.debug("Payment session created for booking id: {}", bookingId);
 
         log.debug("Update the payment status to PAYMENT_PENDING for the booking id: {}", bookingId);

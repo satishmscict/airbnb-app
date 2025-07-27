@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 @Service
 @Slf4j
-public class CheckoutServiceImpl implements CheckoutService {
+public class PaymentGatewayServiceImpl implements PaymentGatewayService {
 
     private static final String CURRENCY_INR = "INR";
     private static final int CURRENCY_UNIT = 100;

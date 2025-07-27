@@ -26,5 +26,5 @@ current:
 stripe:
   frontEndBaseUrl: http://localhost:8080
   webhook:
-    secretKey: whsec_716817f35601bb8f79a069f462118a63a3b70f003df671d0611652328e71e987
-  secretKey: sk_test_51RoQyaJHXuvK1T60JLKBoJGe24gZAiMmc5ypf9U4Lxw3BL7RYFZ4uq7ioUkUmWQjjFSIiYze6TOZLdoaURthk9ds00KR23zFmd
+    secretKey: ${STRIPE_WEBHOOK_SECRET_KEY}
+  secretKey: ${STRIPE_SECRET_KEY}

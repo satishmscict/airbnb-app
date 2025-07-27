@@ -34,10 +34,10 @@ public class HotelBookingController {
         );
     }
 
-    @GetMapping("/{bookingId}/cancel")
-    ResponseEntity<List<GuestDto>> cancelBooking(@PathVariable Long bookingId) {
+    @PatchMapping("/{bookingId}/cancel")
+    ResponseEntity<Map<String, String>> cancelBooking(@PathVariable Long bookingId) {
         hotelBookingService.cancelBooking(bookingId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(Map.of("status", String.format("Booking cancelled with th bookingId: %s", bookingId)));
     }
 
     @PostMapping
@@ -48,7 +48,6 @@ public class HotelBookingController {
 
     @GetMapping("/{bookingId}/status")
     ResponseEntity<Map<String, String>> getBookingStatus(@PathVariable Long bookingId) {
-
         return ResponseEntity.ok(Map.of("bookingStatus", hotelBookingService.getBookingStatus(bookingId)));
     }
 

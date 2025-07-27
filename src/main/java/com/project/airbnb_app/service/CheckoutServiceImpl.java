@@ -31,6 +31,7 @@ public class CheckoutServiceImpl implements CheckoutService {
         Customer customer = null;
         Session session = null;
         try {
+            // Crete customer params builder.
             CustomerCreateParams customerCreateParams = CustomerCreateParams.builder()
                     .setName(user.getName())
                     .setEmail(user.getEmail())
@@ -56,6 +57,7 @@ public class CheckoutServiceImpl implements CheckoutService {
                     .setPriceData(sessionCreateParamsPriceData)
                     .build();
 
+            // Bind all the session related parameters and preparing session.
             SessionCreateParams sessionCreateParams = SessionCreateParams.builder()
                     .setMode(SessionCreateParams.Mode.PAYMENT)
                     .setCustomer(customer.getId())

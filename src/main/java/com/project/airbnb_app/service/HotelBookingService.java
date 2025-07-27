@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface HotelBookingService {
 
-    List<GuestDto> addGuestsToBooking(Long bookingId, List<GuestDto> guestList);
+    List<GuestDto> addGuestsToBooking(Long bookingId, List<GuestDto> guestDtoList);
 
     void cancelBooking(Long bookingId);
 

@@ -7,6 +7,7 @@ import com.project.airbnb_app.repository.GuestRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,8 +21,11 @@ public class GuestServiceImpl implements GuestService {
     private final ModelMapper modelMapper;
 
     @Override
-    public List<GuestDto> addGuests(User user, List<GuestDto> guestDtoList) {
+    public List<GuestDto> addGuests(List<GuestDto> guestDtoList) {
         log.debug("Add guest started with {} guests.", guestDtoList.size());
+
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
         List<Guest> guestList = guestDtoList
                 .stream()
                 .map((element) -> {
@@ -34,7 +38,9 @@ public class GuestServiceImpl implements GuestService {
         guestList = guestRepository.saveAll(guestList);
         log.debug("Saved all guests details.");
 
-        guestDtoList = guestList.stream().map((element) -> modelMapper.map(element, GuestDto.class)).toList();
+        guestDtoList = guestList.stream()
+                .map((element) -> modelMapper.map(element, GuestDto.class))
+                .toList();
 
         return guestDtoList;
     }

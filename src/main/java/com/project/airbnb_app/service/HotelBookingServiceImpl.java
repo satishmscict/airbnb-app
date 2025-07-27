@@ -27,6 +27,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +42,7 @@ public class HotelBookingServiceImpl implements HotelBookingService {
     private final DynamicRoomPricingService dynamicRoomPricingService;
     private final HotelBookingRepository hotelBookingRepository;
     private final HotelDomainService hotelDomainService;
+    private final GuestDomainService guestDomainService;
     private final GuestService guestService;
     private final ModelMapper modelMapper;
     private final RoomDomainService roomDomainService;
@@ -62,8 +64,8 @@ public class HotelBookingServiceImpl implements HotelBookingService {
 
     @Override
     @Transactional
-    public List<GuestDto> addGuestsToBooking(Long bookingId, List<GuestDto> guestList) {
-        log.debug("Adding guest to bookingId {} and total {} guests available.", bookingId, guestList.size());
+    public List<GuestDto> addGuestsToBooking(Long bookingId, List<GuestDto> guestDtoList) {
+        log.debug("Adding guest to bookingId {} and total {} guests available.", bookingId, guestDtoList.size());
 
         HotelBooking hotelBooking = hotelBookingRepository
                 .findById(bookingId)
@@ -77,18 +79,25 @@ public class HotelBookingServiceImpl implements HotelBookingService {
 
         validateBookingStatus(hotelBooking);
 
-        List<GuestDto> guestDtoList = guestService.addGuests(hotelBooking.getUser(), guestList);
+        List<GuestDto> savedGuestDtoList = guestService.addGuests(guestDtoList);
+
+        List<Long> guestIds = savedGuestDtoList.stream().map(GuestDto::getId).toList();
+        List<Guest> guestList = guestDomainService.findGuestByIds(guestIds);
+
         hotelBooking.setBookingStatus(BookingStatus.GUESTS_ADDED);
+        hotelBooking.setGuest(guestList.stream().collect(Collectors.toSet()));
         hotelBookingRepository.save(hotelBooking);
         log.debug("Guests added and update status to GUESTS_ADDED");
 
-        return guestDtoList;
+        return guestList.stream()
+                .map((element) -> modelMapper.map(element, GuestDto.class))
+                .collect(Collectors.toList());
     }
 
     @Override
     @Transactional
     public void cancelBooking(Long bookingId) {
-        log.debug("Cancel booking of bookingId {}.", bookingId);
+        log.debug("Cancel the of bookingId {}.", bookingId);
 
         HotelBooking hotelBooking = hotelBookingRepository
                 .findById(bookingId)
@@ -125,13 +134,12 @@ public class HotelBookingServiceImpl implements HotelBookingService {
 
             Refund.create(refundCreateParams);
         } catch (StripeException e) {
+            log.error("Stripe refund failed with the error message: {}", e.getMessage());
             throw new RuntimeException(e);
         }
-
     }
 
     private void isBookingBelongsToCurrentUser(Long userId) {
-
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (!Objects.equals(userId, user.getId())) {
             throw new UnAuthorizationException("Booking does not belongs to the user id: " + user.getId());

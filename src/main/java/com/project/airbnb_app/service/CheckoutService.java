@@ -8,4 +8,6 @@ public interface CheckoutService {
     void capturePaymentEvent(Event event);
 
     String createCheckoutSession(HotelBooking hotelBooking);
+
+    void processRefundAmount(HotelBooking hotelBooking);
 }

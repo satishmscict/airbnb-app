@@ -6,8 +6,10 @@ import com.project.airbnb_app.entity.enums.BookingStatus;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Customer;
 import com.stripe.model.Event;
+import com.stripe.model.Refund;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.CustomerCreateParams;
+import com.stripe.param.RefundCreateParams;
 import com.stripe.param.checkout.SessionCreateParams;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -25,12 +27,14 @@ public class CheckoutServiceImpl implements CheckoutService {
     private static final String CURRENCY_INR = "INR";
     private static final int CURRENCY_UNIT = 100;
     private static final String STRIPE_EVENT_CHECKOUT_SESSION_COMPLETED = "checkout.session.completed";
-    private final HotelBookingService hotelBookingService;
 
-    private final AppUserDomainService appUserDomainService;
-    private final RoomInventoryService roomInventoryService;
     @Value("${stripe.frontEndBaseUrl}")
     private String paymentGatewayRedirectBaseUrl;
+
+    private final AppUserDomainService appUserDomainService;
+    private final HotelBookingService hotelBookingService;
+    private final HotelBookingDomainService hotelBookingDomainService;
+    private final RoomInventoryService roomInventoryService;
 
     @Override
     public String createCheckoutSession(HotelBooking hotelBooking) {
@@ -51,7 +55,7 @@ public class CheckoutServiceImpl implements CheckoutService {
                 hotelBooking.getRoom().getType(),
                 user.getName()
         );
-        
+
         Session session = null;
         try {
             // Crete customer params builder.
@@ -82,6 +86,21 @@ public class CheckoutServiceImpl implements CheckoutService {
         return session.getUrl();
     }
 
+    @Override
+    public void processRefundAmount(HotelBooking hotelBooking) {
+        try {
+            Session session = Session.retrieve(hotelBooking.getPaymentSessionId());
+            RefundCreateParams refundCreateParams = RefundCreateParams.builder()
+                    .setPaymentIntent(session.getPaymentIntent())
+                    .build();
+
+            Refund.create(refundCreateParams);
+        } catch (StripeException e) {
+            log.error("Stripe refund failed with the error message: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
     @Transactional
     @Override
     public void capturePaymentEvent(Event event) {
@@ -89,7 +108,7 @@ public class CheckoutServiceImpl implements CheckoutService {
             Session session = (Session) event.getDataObjectDeserializer().getObject().orElse(null);
             if (session == null) return;
 
-            HotelBooking hotelBooking = hotelBookingService.findByPaymentSessionId(session.getId());
+            HotelBooking hotelBooking = hotelBookingDomainService.findByPaymentSessionId(session.getId());
 
             hotelBooking.setBookingStatus(BookingStatus.CONFIRMED);
             hotelBookingService.saveBooking(hotelBooking);

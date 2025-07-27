@@ -5,14 +5,9 @@ import com.project.airbnb_app.dto.HotelBookingDto;
 import com.project.airbnb_app.dto.request.HotelBookingRequest;
 import com.project.airbnb_app.entity.*;
 import com.project.airbnb_app.entity.enums.BookingStatus;
-import com.project.airbnb_app.exception.ResourceNotFoundException;
 import com.project.airbnb_app.exception.UnAuthorizationException;
 import com.project.airbnb_app.repository.HotelBookingRepository;
 import com.project.airbnb_app.room_pricing_strategy.DynamicRoomPricingService;
-import com.stripe.exception.StripeException;
-import com.stripe.model.Refund;
-import com.stripe.model.checkout.Session;
-import com.stripe.param.RefundCreateParams;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +15,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
@@ -31,46 +25,29 @@ import java.util.stream.Collectors;
 @Slf4j
 public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestratorService {
 
-    private static final int BOOKING_EXPIRED_MINUTES = 10;
-
     private final AppUserDomainService appUserDomainService;
     private final CheckoutService checkoutService;
     private final DynamicRoomPricingService dynamicRoomPricingService;
     private final GuestDomainService guestDomainService;
     private final GuestService guestService;
+    private final HotelBookingDomainService hotelBookingDomainService;
     private final HotelBookingRepository hotelBookingRepository;
     private final HotelDomainService hotelDomainService;
     private final ModelMapper modelMapper;
     private final RoomDomainService roomDomainService;
     private final RoomInventoryService roomInventoryService;
 
-    private static void validateBookingStatus(HotelBooking hotelBooking) {
-        switch (hotelBooking.getBookingStatus()) {
-            case GUESTS_ADDED:
-                throw new IllegalStateException("Hey, you have already added a guest for this booking.");
-            case RESERVED:
-                break;
-            default:
-                throw new IllegalStateException("Hotel booking status is not RESERVED.");
-        }
-    }
+
 
     @Override
     @Transactional
     public List<GuestDto> addGuestsToBooking(Long bookingId, List<GuestDto> guestDtoList) {
         log.debug("Adding guest to bookingId {} and total {} guests available.", bookingId, guestDtoList.size());
 
-        HotelBooking hotelBooking = hotelBookingRepository
-                .findById(bookingId)
-                .orElseThrow(() -> new ResourceNotFoundException("Hotel booking not found with the id: " + bookingId));
-
-        isBookingBelongsToCurrentUser(hotelBooking.getUser().getId());
-
-        if (isBookingExpired(hotelBooking.getCreatedAt())) {
-            throw new IllegalStateException("Hotel booking has expired. Please initiate a new booking.");
-        }
-
-        validateBookingStatus(hotelBooking);
+        HotelBooking hotelBooking = hotelBookingDomainService.findById(bookingId);
+        hotelBookingDomainService.isBookingBelongsToCurrentUser(hotelBooking.getUser().getId());
+        hotelBookingDomainService.validateBookingNotExpired(hotelBooking.getCreatedAt());
+        hotelBookingDomainService.validateBookingStatusForAddGuests(hotelBooking);
 
         List<GuestDto> savedGuestDtoList = guestService.addGuests(guestDtoList);
 
@@ -92,11 +69,9 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
     public void cancelBooking(Long bookingId) {
         log.debug("Cancel the of bookingId {}.", bookingId);
 
-        HotelBooking hotelBooking = hotelBookingRepository
-                .findById(bookingId)
-                .orElseThrow(() -> new ResourceNotFoundException("Hotel booking not found with the id: " + bookingId));
+        HotelBooking hotelBooking = hotelBookingDomainService.findById(bookingId);
 
-        isBookingBelongsToCurrentUser(hotelBooking.getUser().getId());
+        hotelBookingDomainService.isBookingBelongsToCurrentUser(hotelBooking.getUser().getId());
 
         if (hotelBooking.getBookingStatus() != BookingStatus.CONFIRMED) {
             throw new IllegalStateException("Only confirmed bookings eligible to cancel.");
@@ -119,17 +94,7 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
                 hotelBooking.getRoomsCount()
         );
 
-        try {
-            Session session = Session.retrieve(hotelBooking.getPaymentSessionId());
-            RefundCreateParams refundCreateParams = RefundCreateParams.builder()
-                    .setPaymentIntent(session.getPaymentIntent())
-                    .build();
-
-            Refund.create(refundCreateParams);
-        } catch (StripeException e) {
-            log.error("Stripe refund failed with the error message: {}", e.getMessage());
-            throw new RuntimeException(e);
-        }
+        checkoutService.processRefundAmount(hotelBooking);
     }
 
     @Transactional
@@ -180,12 +145,7 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
     @Override
     public String initiatePayment(Long bookingId) {
         log.debug("Start initiate payment.");
-        HotelBooking hotelBooking = hotelBookingRepository.findById(bookingId)
-                .orElseThrow(() -> {
-                    String errorMessage = String.format("Booking not found with the id: %s", bookingId);
-                    log.error(errorMessage);
-                    return new ResourceNotFoundException(errorMessage);
-                });
+        HotelBooking hotelBooking = hotelBookingDomainService.findById(bookingId);
 
         User user = appUserDomainService.getCurrentUser();
         if (!Objects.equals(hotelBooking.getUser().getId(), user.getId())) {
@@ -194,9 +154,7 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
             throw new UnAuthorizationException(errorMessage);
         }
 
-        if (isBookingExpired(hotelBooking.getCreatedAt())) {
-            throw new IllegalStateException("Hotel booking has expired. Please initiate a new booking.");
-        }
+        hotelBookingDomainService.validateBookingNotExpired(hotelBooking.getCreatedAt());
 
         log.debug("Prepare the stripe payment request object and get the payment session url.");
         String paymentSessionUrl = checkoutService.createCheckoutSession(hotelBooking);
@@ -208,16 +166,5 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
         log.debug("Successfully update the booking status to PAYMENT_PENDING for the booking id: {}", bookingId);
 
         return paymentSessionUrl;
-    }
-
-    private void isBookingBelongsToCurrentUser(Long userId) {
-        User user = appUserDomainService.getCurrentUser();
-        if (!Objects.equals(userId, user.getId())) {
-            throw new UnAuthorizationException("Booking does not belongs to the user id: " + user.getId());
-        }
-    }
-
-    private Boolean isBookingExpired(LocalDateTime bookingStartDate) {
-        return bookingStartDate.plusMinutes(BOOKING_EXPIRED_MINUTES).isBefore(LocalDateTime.now());
     }
 }

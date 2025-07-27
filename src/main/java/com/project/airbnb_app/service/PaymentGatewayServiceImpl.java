@@ -121,7 +121,7 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
                     hotelBooking.getRoomsCount()
             );
 
-            roomInventoryService.confirmBooking(
+            roomInventoryService.updateBookingCount(
                     hotelBooking.getRoom().getId(),
                     hotelBooking.getCheckInDate().toLocalDate(),
                     hotelBooking.getCheckOutDate().toLocalDate(),

@@ -2,6 +2,7 @@ package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.entity.HotelBooking;
 import com.project.airbnb_app.entity.User;
+import com.project.airbnb_app.entity.enums.BookingStatus;
 import com.project.airbnb_app.exception.ResourceNotFoundException;
 import com.project.airbnb_app.exception.UnAuthorizationException;
 import com.project.airbnb_app.repository.HotelBookingRepository;
@@ -47,7 +48,9 @@ public class HotelBookingDomainService {
     public void isBookingBelongsToCurrentUser(Long userId) {
         User user = appUserDomainService.getCurrentUser();
         if (!Objects.equals(userId, user.getId())) {
-            throw new UnAuthorizationException("Booking does not belongs to the user id: " + user.getId());
+            String errorMessage = String.format("Booking does not belongs to the user id: %s", userId);
+            log.error(errorMessage);
+            throw new UnAuthorizationException(errorMessage);
         }
     }
 
@@ -74,6 +77,14 @@ public class HotelBookingDomainService {
                 break;
             default:
                 throw new IllegalStateException("Hotel booking status is not RESERVED.");
+        }
+    }
+
+    public void validateBookingStatusIsConfirmed(HotelBooking hotelBooking) {
+        if (hotelBooking.getBookingStatus() != BookingStatus.CONFIRMED) {
+            String errorMessage = "Only confirmed bookings eligible to cancel.";
+            log.error(errorMessage);
+            throw new IllegalStateException(errorMessage);
         }
     }
 }

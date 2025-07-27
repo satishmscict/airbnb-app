@@ -18,28 +18,26 @@ import java.util.List;
 @Repository
 public interface RoomInventoryRepository extends JpaRepository<RoomInventory, Long> {
 
+    void deleteAllByHotelIdAndRoomId(Long hotelId, Long roomId);
+
     /**
-     * Converts a reservation into a confirmed booking by moving rooms from reserved to booked.
+     * Releases booked rooms, making them available again.
      */
     @Modifying
     @Query("""
             UPDATE RoomInventory ri
-            SET ri.reservedRoomsCount = ri.reservedRoomsCount - :roomsCount,
-                ri.bookedRoomsCount = ri.bookedRoomsCount + :roomsCount
+            SET ri.bookedRoomsCount = ri.bookedRoomsCount - :roomsCount
             WHERE ri.room.id = :roomId
                AND ri.date between :startDate and :endDate
                AND (ri.totalRoomsCount - ri.bookedRoomsCount) >= :roomsCount
-               AND ri.reservedRoomsCount >= :roomsCount
                AND ri.closed = false
             """)
-    void confirmBooking(
+    void decreaseBookedCount(
             @Param("roomId") Long roomId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
             @Param("roomsCount") Integer roomsCount
     );
-
-    void deleteAllByHotelIdAndRoomId(Long hotelId, Long roomId);
 
     @Query("""
             SELECT ri
@@ -99,25 +97,6 @@ public interface RoomInventoryRepository extends JpaRepository<RoomInventory, Lo
             Pageable pageable
     );
 
-    /**
-     * Releases booked rooms, making them available again.
-     */
-    @Modifying
-    @Query("""
-            UPDATE RoomInventory ri
-            SET ri.bookedRoomsCount = ri.bookedRoomsCount - :roomsCount
-            WHERE ri.room.id = :roomId
-               AND ri.date between :startDate and :endDate
-               AND (ri.totalRoomsCount - ri.bookedRoomsCount) >= :roomsCount
-               AND ri.closed = false
-            """)
-    void releaseBookedRooms(
-            @Param("roomId") Long roomId,
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate,
-            @Param("roomsCount") Integer roomsCount
-    );
-
     @Modifying
     @Query("""
                 UPDATE RoomInventory ri
@@ -132,5 +111,26 @@ public interface RoomInventoryRepository extends JpaRepository<RoomInventory, Lo
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
             @Param("numberOfRooms") int numberOfRooms
+    );
+
+    /**
+     * Converts a reservation into a confirmed booking by moving rooms from reserved to booked.
+     */
+    @Modifying
+    @Query("""
+            UPDATE RoomInventory ri
+            SET ri.reservedRoomsCount = ri.reservedRoomsCount - :roomsCount,
+                ri.bookedRoomsCount = ri.bookedRoomsCount + :roomsCount
+            WHERE ri.room.id = :roomId
+               AND ri.date between :startDate and :endDate
+               AND (ri.totalRoomsCount - ri.bookedRoomsCount) >= :roomsCount
+               AND ri.reservedRoomsCount >= :roomsCount
+               AND ri.closed = false
+            """)
+    void updateBookingCount(
+            @Param("roomId") Long roomId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("roomsCount") Integer roomsCount
     );
 }

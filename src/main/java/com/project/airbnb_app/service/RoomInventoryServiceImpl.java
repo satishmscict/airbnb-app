@@ -52,11 +52,6 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
     }
 
     @Override
-    public void confirmBooking(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount) {
-        roomInventoryRepository.confirmBooking(roomId, checkInDate, checkOutDate, roomsCount);
-    }
-
-    @Override
     public void createInventory(Long hotelId, Long roomId) {
         Hotel hotel = hotelDomainService.getHotelById(hotelId);
 
@@ -79,6 +74,16 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
     }
 
     @Override
+    public void decreaseBookedCount(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount) {
+        roomInventoryRepository.decreaseBookedCount(
+                roomId,
+                checkInDate,
+                checkOutDate,
+                roomsCount
+        );
+    }
+
+    @Override
     @Transactional
     public void deleteInventoryByHotelIdAndRoomId(Long hotelId, Long roomId) {
         log.debug("Delete inventory with the hotel id: {} and room id: {}.", hotelId, roomId);
@@ -90,16 +95,6 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
     public void findAndLockInventoryForModification(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount) {
         roomInventoryRepository.findAndLockInventoryForModification(
                 roomId, checkInDate, checkOutDate, roomsCount
-        );
-    }
-
-    @Override
-    public void releaseBookedRooms(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount) {
-        roomInventoryRepository.releaseBookedRooms(
-                roomId,
-                checkInDate,
-                checkOutDate,
-                roomsCount
         );
     }
 
@@ -130,6 +125,11 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
         log.debug("Total {} hotels found.", hotelsList.getContent().size());
 
         return hotelsList.map((element) -> modelMapper.map(element, HotelDto.class));
+    }
+
+    @Override
+    public void updateBookingCount(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount) {
+        roomInventoryRepository.updateBookingCount(roomId, checkInDate, checkOutDate, roomsCount);
     }
 
     @Transactional

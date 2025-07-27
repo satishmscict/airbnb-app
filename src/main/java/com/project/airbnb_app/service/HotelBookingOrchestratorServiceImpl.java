@@ -37,16 +37,17 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
     private final RoomDomainService roomDomainService;
     private final RoomInventoryService roomInventoryService;
 
-
-
     @Override
     @Transactional
     public List<GuestDto> addGuestsToBooking(Long bookingId, List<GuestDto> guestDtoList) {
         log.debug("Adding guest to bookingId {} and total {} guests available.", bookingId, guestDtoList.size());
 
         HotelBooking hotelBooking = hotelBookingDomainService.findById(bookingId);
+
         hotelBookingDomainService.isBookingBelongsToCurrentUser(hotelBooking.getUser().getId());
+
         hotelBookingDomainService.validateBookingNotExpired(hotelBooking.getCreatedAt());
+
         hotelBookingDomainService.validateBookingStatusForAddGuests(hotelBooking);
 
         List<GuestDto> savedGuestDtoList = guestService.addGuests(guestDtoList);
@@ -73,9 +74,7 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
 
         hotelBookingDomainService.isBookingBelongsToCurrentUser(hotelBooking.getUser().getId());
 
-        if (hotelBooking.getBookingStatus() != BookingStatus.CONFIRMED) {
-            throw new IllegalStateException("Only confirmed bookings eligible to cancel.");
-        }
+        hotelBookingDomainService.validateBookingStatusIsConfirmed(hotelBooking);
 
         hotelBooking.setBookingStatus(BookingStatus.CANCELLED);
         hotelBookingRepository.save(hotelBooking);
@@ -87,7 +86,7 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
                 hotelBooking.getRoomsCount()
         );
 
-        roomInventoryService.releaseBookedRooms(
+        roomInventoryService.decreaseBookedCount(
                 hotelBooking.getRoom().getId(),
                 hotelBooking.getCheckInDate().toLocalDate(),
                 hotelBooking.getCheckOutDate().toLocalDate(),
@@ -147,12 +146,7 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
         log.debug("Start initiate payment.");
         HotelBooking hotelBooking = hotelBookingDomainService.findById(bookingId);
 
-        User user = appUserDomainService.getCurrentUser();
-        if (!Objects.equals(hotelBooking.getUser().getId(), user.getId())) {
-            String errorMessage = String.format("Booking does not belongs to the user id: %s", hotelBooking.getUser().getId());
-            log.error(errorMessage);
-            throw new UnAuthorizationException(errorMessage);
-        }
+        hotelBookingDomainService.isBookingBelongsToCurrentUser(hotelBooking.getUser().getId());
 
         hotelBookingDomainService.validateBookingNotExpired(hotelBooking.getCreatedAt());
 

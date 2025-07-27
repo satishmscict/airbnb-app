@@ -11,19 +11,19 @@ import java.util.List;
 
 public interface RoomInventoryService {
 
-    void confirmBooking(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount);
-
     void createInventory(Long hotelId, Long roomId);
+
+    void decreaseBookedCount(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount);
 
     void deleteInventoryByHotelIdAndRoomId(Long hotelId, Long roomId);
 
     void findAndLockInventoryForModification(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount);
 
-    void releaseBookedRooms(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount);
-
     void saveAll(List<RoomInventory> roomInventories);
 
     Page<HotelDto> searchHotelsByCityAndAvailability(HotelSearchRequest hotelSearchRequest);
+
+    void updateBookingCount(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount);
 
     List<RoomInventory> updateReservedRoomsCount(HotelBookingRequest hotelBookingRequest);
 }

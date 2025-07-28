@@ -137,7 +137,7 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
     public List<RoomInventory> updateReservedRoomsCount(HotelBookingRequest hotelBookingRequest) {
         List<RoomInventory> roomInventoryList = findAndLockAvailableInventory(hotelBookingRequest);
 
-        roomInventoryRepository.reserveRooms(
+        roomInventoryRepository.updateReservedRoomsCount(
                 hotelBookingRequest.getRoomId(),
                 hotelBookingRequest.getCheckInDate().toLocalDate(),
                 hotelBookingRequest.getCheckOutDate().toLocalDate(),

@@ -32,7 +32,7 @@ public class WebhookController {
 
             return ResponseEntity.noContent().build();
         } catch (SignatureVerificationException e) {
-            log.error("payment webhook failed with the error : {}", e.getMessage());
+            log.error("Payment webhook failed with the error : {}", e.getMessage());
             throw new RuntimeException(e);
         }
     }

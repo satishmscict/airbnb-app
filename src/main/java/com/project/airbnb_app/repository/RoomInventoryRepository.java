@@ -20,9 +20,6 @@ public interface RoomInventoryRepository extends JpaRepository<RoomInventory, Lo
 
     void deleteAllByHotelIdAndRoomId(Long hotelId, Long roomId);
 
-    /**
-     * Releases booked rooms, making them available again.
-     */
     @Modifying
     @Query("""
             UPDATE RoomInventory ri
@@ -106,16 +103,13 @@ public interface RoomInventoryRepository extends JpaRepository<RoomInventory, Lo
                   AND (ri.totalRoomsCount - ri.bookedRoomsCount - ri.reservedRoomsCount) >= :numberOfRooms
                   AND ri.closed = false
             """)
-    void reserveRooms(
+    void updateReservedRoomsCount(
             @Param("roomId") Long roomId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
             @Param("numberOfRooms") int numberOfRooms
     );
 
-    /**
-     * Converts a reservation into a confirmed booking by moving rooms from reserved to booked.
-     */
     @Modifying
     @Query("""
             UPDATE RoomInventory ri

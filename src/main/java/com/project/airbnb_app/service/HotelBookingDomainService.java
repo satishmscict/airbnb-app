@@ -23,6 +23,35 @@ public class HotelBookingDomainService {
     private final AppUserDomainService appUserDomainService;
     private final HotelBookingRepository hotelBookingRepository;
 
+    public void checkBookingStatusIsConfirmed(HotelBooking hotelBooking) {
+        if (hotelBooking.getBookingStatus() != BookingStatus.CONFIRMED) {
+            String errorMessage = "Only confirmed bookings eligible to cancel.";
+            log.error(errorMessage);
+            throw new IllegalStateException(errorMessage);
+        }
+    }
+
+    public void checkBookingStatusIsReserved(HotelBooking hotelBooking) {
+        BookingStatus status = hotelBooking.getBookingStatus();
+
+        if (status == BookingStatus.RESERVED) {
+            return;
+        }
+
+        String errorMessage = (status == BookingStatus.GUESTS_ADDED)
+                ? "You have already added a guest for this booking."
+                : "Hotel booking status is not RESERVED.";
+
+        log.error(errorMessage);
+        throw new IllegalStateException(errorMessage);
+    }
+
+    public void checkBookingTimeIsNotExpired(LocalDateTime bookingStartDate) {
+        if (bookingStartDate.plusMinutes(BOOKING_EXPIRED_MINUTES).isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("Hotel booking has expired. Please initiate a new booking.");
+        }
+    }
+
     public HotelBooking findByPaymentSessionId(String paymentSessionId) {
         return hotelBookingRepository.findByPaymentSessionId(paymentSessionId)
                 .orElseThrow(() -> {
@@ -61,30 +90,5 @@ public class HotelBookingDomainService {
                     log.error(errorMessage);
                     return new ResourceNotFoundException(errorMessage);
                 });
-    }
-
-    public void validateBookingNotExpired(LocalDateTime bookingStartDate) {
-        if (bookingStartDate.plusMinutes(BOOKING_EXPIRED_MINUTES).isBefore(LocalDateTime.now())) {
-            throw new IllegalStateException("Hotel booking has expired. Please initiate a new booking.");
-        }
-    }
-
-    public void validateBookingStatusForAddGuests(HotelBooking hotelBooking) {
-        switch (hotelBooking.getBookingStatus()) {
-            case GUESTS_ADDED:
-                throw new IllegalStateException("Hey, you have already added a guest for this booking.");
-            case RESERVED:
-                break;
-            default:
-                throw new IllegalStateException("Hotel booking status is not RESERVED.");
-        }
-    }
-
-    public void validateBookingStatusIsConfirmed(HotelBooking hotelBooking) {
-        if (hotelBooking.getBookingStatus() != BookingStatus.CONFIRMED) {
-            String errorMessage = "Only confirmed bookings eligible to cancel.";
-            log.error(errorMessage);
-            throw new IllegalStateException(errorMessage);
-        }
     }
 }

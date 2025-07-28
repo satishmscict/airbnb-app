@@ -30,6 +30,12 @@ creation, and guest management. The API is developed following clean code practi
 
 ---
 
+### ✅ **Configuration**
+
+Install Stripe Web hook CLI and run the command to start listed the payment staus:
+
+`stripe listen --forward-to localhost:8080/api/v1/webhook/payment`
+
 ### ✅ **Database Diagram**
 
 ![img.png](database-view.png)

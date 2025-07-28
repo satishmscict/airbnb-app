@@ -46,9 +46,9 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
 
         hotelBookingDomainService.isBookingBelongsToCurrentUser(hotelBooking.getUser().getId());
 
-        hotelBookingDomainService.validateBookingNotExpired(hotelBooking.getCreatedAt());
+        hotelBookingDomainService.checkBookingTimeIsNotExpired(hotelBooking.getCreatedAt());
 
-        hotelBookingDomainService.validateBookingStatusForAddGuests(hotelBooking);
+        hotelBookingDomainService.checkBookingStatusIsReserved(hotelBooking);
 
         List<GuestDto> savedGuestDtoList = guestService.addGuests(guestDtoList);
 
@@ -74,7 +74,7 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
 
         hotelBookingDomainService.isBookingBelongsToCurrentUser(hotelBooking.getUser().getId());
 
-        hotelBookingDomainService.validateBookingStatusIsConfirmed(hotelBooking);
+        hotelBookingDomainService.checkBookingStatusIsConfirmed(hotelBooking);
 
         hotelBooking.setBookingStatus(BookingStatus.CANCELLED);
         hotelBookingRepository.save(hotelBooking);
@@ -86,7 +86,7 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
                 hotelBooking.getRoomsCount()
         );
 
-        roomInventoryService.decreaseBookedCount(
+        roomInventoryService.decreaseBookedRoomsCount(
                 hotelBooking.getRoom().getId(),
                 hotelBooking.getCheckInDate().toLocalDate(),
                 hotelBooking.getCheckOutDate().toLocalDate(),
@@ -148,7 +148,7 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
 
         hotelBookingDomainService.isBookingBelongsToCurrentUser(hotelBooking.getUser().getId());
 
-        hotelBookingDomainService.validateBookingNotExpired(hotelBooking.getCreatedAt());
+        hotelBookingDomainService.checkBookingTimeIsNotExpired(hotelBooking.getCreatedAt());
 
         log.debug("Prepare the stripe payment request object and get the payment session url.");
         String paymentSessionUrl = paymentGatewayService.createCheckoutSession(hotelBooking);

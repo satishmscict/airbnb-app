@@ -56,7 +56,7 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
                 user.getName()
         );
 
-        Session session = null;
+        Session session;
         try {
             // Crete customer params builder.
             Customer customer = createStripeCustomer(user);
@@ -121,7 +121,7 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
                     hotelBooking.getRoomsCount()
             );
 
-            roomInventoryService.updateBookingCount(
+            roomInventoryService.updateBookedRoomsCount(
                     hotelBooking.getRoom().getId(),
                     hotelBooking.getCheckInDate().toLocalDate(),
                     hotelBooking.getCheckOutDate().toLocalDate(),

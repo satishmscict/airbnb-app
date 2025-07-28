@@ -74,8 +74,8 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
     }
 
     @Override
-    public void decreaseBookedCount(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount) {
-        roomInventoryRepository.decreaseBookedCount(
+    public void decreaseBookedRoomsCount(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount) {
+        roomInventoryRepository.decreaseBookedRoomsCount(
                 roomId,
                 checkInDate,
                 checkOutDate,
@@ -128,8 +128,8 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
     }
 
     @Override
-    public void updateBookingCount(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount) {
-        roomInventoryRepository.updateBookingCount(roomId, checkInDate, checkOutDate, roomsCount);
+    public void updateBookedRoomsCount(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount) {
+        roomInventoryRepository.updateBookedRoomsCount(roomId, checkInDate, checkOutDate, roomsCount);
     }
 
     @Transactional

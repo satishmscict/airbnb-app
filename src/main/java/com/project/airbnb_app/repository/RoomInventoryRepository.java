@@ -32,7 +32,7 @@ public interface RoomInventoryRepository extends JpaRepository<RoomInventory, Lo
                AND (ri.totalRoomsCount - ri.bookedRoomsCount) >= :roomsCount
                AND ri.closed = false
             """)
-    void decreaseBookedCount(
+    void decreaseBookedRoomsCount(
             @Param("roomId") Long roomId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
@@ -127,7 +127,7 @@ public interface RoomInventoryRepository extends JpaRepository<RoomInventory, Lo
                AND ri.reservedRoomsCount >= :roomsCount
                AND ri.closed = false
             """)
-    void updateBookingCount(
+    void updateBookedRoomsCount(
             @Param("roomId") Long roomId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,

@@ -13,7 +13,7 @@ public interface RoomInventoryService {
 
     void createInventory(Long hotelId, Long roomId);
 
-    void decreaseBookedCount(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount);
+    void decreaseBookedRoomsCount(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount);
 
     void deleteInventoryByHotelIdAndRoomId(Long hotelId, Long roomId);
 
@@ -23,7 +23,7 @@ public interface RoomInventoryService {
 
     Page<HotelDto> searchHotelsByCityAndAvailability(HotelSearchRequest hotelSearchRequest);
 
-    void updateBookingCount(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount);
+    void updateBookedRoomsCount(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount);
 
     List<RoomInventory> updateReservedRoomsCount(HotelBookingRequest hotelBookingRequest);
 }

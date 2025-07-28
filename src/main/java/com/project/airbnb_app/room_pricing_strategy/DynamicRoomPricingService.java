@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -23,5 +24,11 @@ public class DynamicRoomPricingService {
         pricingStrategy = new HolidayPricingDecorator(pricingStrategy);
 
         return pricingStrategy.calculatePrice(roomInventory);
+    }
+
+    public BigDecimal getTotalPrice(List<RoomInventory> roomInventories) {
+        return roomInventories.stream()
+                .map(this::calculateFinalPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

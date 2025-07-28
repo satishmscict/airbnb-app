@@ -52,11 +52,50 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
     }
 
     @Override
+    public void createInventory(Long hotelId, Long roomId) {
+        Hotel hotel = hotelDomainService.getHotelById(hotelId);
+
+        log.debug("Fetch room by id {}", roomId);
+        Room room = roomDomainService.getRoomById(hotelId, roomId);
+        log.debug("Room found with the id: {}", roomId);
+
+        log.debug("Generate inventory for next {} days", TOTAL_INVENTORY_YEARS);
+        LocalDate currentDate = LocalDate.now();
+        LocalDate endDate = currentDate.plusYears(TOTAL_INVENTORY_YEARS);
+
+        List<RoomInventory> generateRoomInventory = new ArrayList<>();
+        for (LocalDate date = currentDate; !date.isEqual(endDate); date = date.plusDays(1)) {
+            RoomInventory roomInventory = buildInventory(hotel, room, date);
+            generateRoomInventory.add(roomInventory);
+        }
+        roomInventoryRepository.saveAll(generateRoomInventory);
+
+        log.debug("Successfully generate and save all the inventories, total {} inventories created.", generateRoomInventory.size());
+    }
+
+    @Override
+    public void decreaseBookedRoomsCount(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount) {
+        roomInventoryRepository.decreaseBookedRoomsCount(
+                roomId,
+                checkInDate,
+                checkOutDate,
+                roomsCount
+        );
+    }
+
+    @Override
     @Transactional
     public void deleteInventoryByHotelIdAndRoomId(Long hotelId, Long roomId) {
         log.debug("Delete inventory with the hotel id: {} and room id: {}.", hotelId, roomId);
         roomInventoryRepository.deleteAllByHotelIdAndRoomId(hotelId, roomId);
         log.debug("Delete inventory with the hotel id: {} and room id: {} is completed.", hotelId, roomId);
+    }
+
+    @Override
+    public void findAndLockInventoryForModification(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount) {
+        roomInventoryRepository.findAndLockInventoryForModification(
+                roomId, checkInDate, checkOutDate, roomsCount
+        );
     }
 
     @Override
@@ -88,15 +127,23 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
         return hotelsList.map((element) -> modelMapper.map(element, HotelDto.class));
     }
 
+    @Override
+    public void updateBookedRoomsCount(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount) {
+        roomInventoryRepository.updateBookedRoomsCount(roomId, checkInDate, checkOutDate, roomsCount);
+    }
+
     @Transactional
     @Override
     public List<RoomInventory> updateReservedRoomsCount(HotelBookingRequest hotelBookingRequest) {
         List<RoomInventory> roomInventoryList = findAndLockAvailableInventory(hotelBookingRequest);
 
-        for (RoomInventory roomInventory : roomInventoryList) {
-            roomInventory.setReservedRoomsCount(roomInventory.getReservedRoomsCount() + hotelBookingRequest.getBookedRoomsCount());
-        }
-        roomInventoryList = roomInventoryRepository.saveAll(roomInventoryList);
+        roomInventoryRepository.updateReservedRoomsCount(
+                hotelBookingRequest.getRoomId(),
+                hotelBookingRequest.getCheckInDate().toLocalDate(),
+                hotelBookingRequest.getCheckOutDate().toLocalDate(),
+                hotelBookingRequest.getBookedRoomsCount()
+        );
+        log.debug("Update reserve room count with the room inventory completed.");
 
         return roomInventoryList;
     }
@@ -113,27 +160,5 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
         } catch (OptimisticLockException optimisticLockException) {
             throw new RuntimeException(optimisticLockException);
         }
-    }
-
-    @Override
-    public void createInventory(Long hotelId, Long roomId) {
-        Hotel hotel = hotelDomainService.getHotelById(hotelId);
-
-        log.debug("Fetch room by id {}", roomId);
-        Room room = roomDomainService.getRoomById(hotelId, roomId);
-        log.debug("Room found with the id: {}", roomId);
-
-        log.debug("Generate inventory for next {} days", TOTAL_INVENTORY_YEARS);
-        LocalDate currentDate = LocalDate.now();
-        LocalDate endDate = currentDate.plusYears(TOTAL_INVENTORY_YEARS);
-
-        List<RoomInventory> generateRoomInventory = new ArrayList<>();
-        for (LocalDate date = currentDate; !date.isEqual(endDate); date = date.plusDays(1)) {
-            RoomInventory roomInventory = buildInventory(hotel, room, date);
-            generateRoomInventory.add(roomInventory);
-        }
-        roomInventoryRepository.saveAll(generateRoomInventory);
-
-        log.debug("Successfully generate and save all the inventories, total {} inventories created.", generateRoomInventory.size());
     }
 }

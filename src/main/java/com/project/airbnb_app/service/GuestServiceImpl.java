@@ -16,12 +16,16 @@ import java.util.List;
 @Slf4j
 public class GuestServiceImpl implements GuestService {
 
+    private final AppUserDomainService appUserDomainService;
     private final GuestRepository guestRepository;
     private final ModelMapper modelMapper;
 
     @Override
-    public List<GuestDto> addGuests(User user, List<GuestDto> guestDtoList) {
+    public List<GuestDto> addGuests(List<GuestDto> guestDtoList) {
         log.debug("Add guest started with {} guests.", guestDtoList.size());
+
+        User user = appUserDomainService.getCurrentUser();
+
         List<Guest> guestList = guestDtoList
                 .stream()
                 .map((element) -> {
@@ -34,7 +38,9 @@ public class GuestServiceImpl implements GuestService {
         guestList = guestRepository.saveAll(guestList);
         log.debug("Saved all guests details.");
 
-        guestDtoList = guestList.stream().map((element) -> modelMapper.map(element, GuestDto.class)).toList();
+        guestDtoList = guestList.stream()
+                .map((element) -> modelMapper.map(element, GuestDto.class))
+                .toList();
 
         return guestDtoList;
     }

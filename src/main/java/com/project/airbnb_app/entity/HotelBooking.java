@@ -58,6 +58,9 @@ public class HotelBooking {
     )
     private Set<Guest> guest;
 
+    @Column(unique = true)
+    private String paymentSessionId;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;

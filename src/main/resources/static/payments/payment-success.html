@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Booking Payment Status</title>
+    <meta content="Result of your hotel room booking payment." name="description">
+    <meta content="noindex, nofollow" name="robots">
+
+    <style>
+        body {
+          background: #f5f5f5;
+          font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+          margin: 0;
+          padding: 0;
+        }
+
+        .container {
+          max-width: 400px;
+          margin: 60px auto;
+          background: #fff;
+          border-radius: 14px;
+          box-shadow: 0 2px 12px rgba(0,0,0,0.09);
+          padding: 32px 24px 28px 24px;
+          text-align: center;
+        }
+
+        h1 {
+          color: #2E7D32;
+          font-size: 2rem;
+          margin-bottom: 12px;
+        }
+
+        .status-success {
+          color: #fff;
+          background: #43a047;
+          padding: 8px 0;
+          border-radius: 8px;
+          font-weight: bold;
+          font-size: 1.2rem;
+          margin-bottom: 18px;
+        }
+
+        .status-failed {
+          color: #fff;
+          background: #d32f2f;
+          padding: 8px 0;
+          border-radius: 8px;
+          font-weight: bold;
+          font-size: 1.2rem;
+          margin-bottom: 18px;
+        }
+
+        .details {
+          text-align: left;
+          margin: 0 auto 20px auto;
+          max-width: 320px;
+          font-size: 1rem;
+          color: #333;
+        }
+
+        .details strong {
+          display: inline-block;
+          width: 120px;
+          font-weight: bold;
+        }
+
+        .chip {
+          display: inline-block;
+          padding: 7px 16px;
+          border-radius: 24px;
+          font-weight: 600;
+          font-size: 1rem;
+          margin-top: 10px;
+        }
+
+        .chip.success {
+          background: #e8f5e9;
+          color: #388e3c;
+        }
+
+        .chip.failed {
+          background: #ffebee;
+          color: #c62828;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Booking Status</h1>
+    <div id="status"></div>
+    <div class="details" id="details"></div>
+    <div id="chip"></div>
+</div>
+
+<script>
+    function getParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name) || '';
+    }
+
+    const user   = getParam('user');
+    const hotel  = getParam('hotel');
+    const room   = getParam('room');
+    const amount = getParam('amount');
+    const success= getParam('success');
+
+    // Set status
+    const statusEl = document.getElementById('status');
+    const chipEl   = document.getElementById('chip');
+    if (success.toLowerCase() === 'true') {
+      statusEl.innerHTML = '<div class="status-success">Payment Successful!</div>';
+      chipEl.innerHTML = '<span class="chip success">Success</span>';
+    } else {
+      statusEl.innerHTML = '<div class="status-failed">Payment Failed</div>';
+      chipEl.innerHTML = '<span class="chip failed">Failed</span>';
+    }
+
+    // Set details
+    const details = [];
+    if (user)   details.push(`<div><strong>User Name:</strong> ${decodeURIComponent(user)}</div>`);
+    if (hotel)  details.push(`<div><strong>Hotel Name:</strong> ${decodeURIComponent(hotel)}</div>`);
+    if (room)   details.push(`<div><strong>Room Type:</strong> ${decodeURIComponent(room)}</div>`);
+    if (amount) details.push(`<div><strong>Booking Amount:</strong> ₹${decodeURIComponent(amount)}</div>`);
+    document.getElementById('details').innerHTML = details.join('');
+</script>
+</body>
+</html>

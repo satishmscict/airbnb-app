@@ -5,6 +5,7 @@ import com.project.airbnb_app.exception.ResourceNotFoundException;
 import com.project.airbnb_app.repository.AppUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -25,5 +26,9 @@ public class AppUserDomainService {
         return appUserRepository
                 .findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found the given id: " + userId));
+    }
+
+    public User getCurrentUser() {
+        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 }

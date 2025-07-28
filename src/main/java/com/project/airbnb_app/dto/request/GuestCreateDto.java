@@ -9,6 +9,5 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class GuestCreateDto {
-    private Long bookingId;
     private List<GuestDto> guest;
 }

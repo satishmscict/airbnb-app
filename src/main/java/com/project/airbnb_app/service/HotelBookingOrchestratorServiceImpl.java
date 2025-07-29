@@ -114,7 +114,7 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
 
         Hotel hotel = hotelDomainService.getHotelByIdAndIsActivated(hotelBookingRequest.getHotelId());
 
-        Room room = roomDomainService.getRoomById(
+        Room room = roomDomainService.getRoomByHotelIdAndRoomId(
                 hotelBookingRequest.getRoomId(),
                 hotelBookingRequest.getHotelId()
         );

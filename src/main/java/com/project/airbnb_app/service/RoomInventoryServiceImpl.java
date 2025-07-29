@@ -1,6 +1,8 @@
 package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.dto.HotelDto;
+import com.project.airbnb_app.dto.RoomInventoryDto;
+import com.project.airbnb_app.dto.RoomInventoryRequestDto;
 import com.project.airbnb_app.dto.request.HotelBookingRequest;
 import com.project.airbnb_app.dto.request.HotelSearchRequest;
 import com.project.airbnb_app.entity.Hotel;
@@ -22,6 +24,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -56,7 +59,7 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
         Hotel hotel = hotelDomainService.getHotelById(hotelId);
 
         log.debug("Fetch room by id {}", roomId);
-        Room room = roomDomainService.getRoomById(hotelId, roomId);
+        Room room = roomDomainService.getRoomByHotelIdAndRoomId(hotelId, roomId);
         log.debug("Room found with the id: {}", roomId);
 
         log.debug("Generate inventory for next {} days", TOTAL_INVENTORY_YEARS);
@@ -96,6 +99,21 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
         roomInventoryRepository.findAndLockInventoryForModification(
                 roomId, checkInDate, checkOutDate, roomsCount
         );
+    }
+
+    @Transactional
+    @Override
+    public List<RoomInventoryDto> getRoomInventoryByRoomId(Long roomId) {
+        Room room = roomDomainService.getRoomByRoomId(roomId);
+        Hotel hotel = room.getHotel();
+
+        hotelDomainService.validateHotelOwnership(hotel.getOwner().getId());
+
+        List<RoomInventory> roomInventoryList = roomInventoryRepository.findAllByHotelAndRoom(hotel, room);
+
+        return roomInventoryList.stream()
+                .map((element) -> modelMapper.map(element, RoomInventoryDto.class))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -146,6 +164,32 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
         log.debug("Update reserve room count with the room inventory completed.");
 
         return roomInventoryList;
+    }
+
+    @Transactional
+    @Override
+    public void updateRoomInventory(Long roomId, RoomInventoryRequestDto roomInventoryRequestDto) {
+        Room room = roomDomainService.getRoomByRoomId(roomId);
+
+        hotelDomainService.validateHotelOwnership(room.getHotel().getOwner().getId());
+
+        // Lock the inventory records for update
+        roomInventoryRepository.findAndLockInventoryForUpdate(
+                roomId,
+                roomInventoryRequestDto.getStartDate(),
+                roomInventoryRequestDto.getEndDate()
+        );
+
+        // Update the inventory records.
+        roomInventoryRepository.updateRoomInventory(
+                room.getId(),
+                roomInventoryRequestDto.getSurgeFactor(),
+                roomInventoryRequestDto.getStartDate(),
+                roomInventoryRequestDto.getEndDate(),
+                roomInventoryRequestDto.getClosed()
+        );
+
+        log.debug("Update room inventory completed.");
     }
 
     @Transactional

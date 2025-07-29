@@ -14,13 +14,26 @@ public class RoomDomainService {
 
     private final RoomRepository roomRepository;
 
-    Room getRoomById(Long hotelId, Long roomId) {
+    Room getRoomByHotelIdAndRoomId(Long hotelId, Long roomId) {
         log.debug("Fetch room by hotel id: {} and room id: {} ", hotelId, roomId);
+
         Room room = roomRepository
                 .findByIdAndHotelId(roomId, hotelId)
                 .orElseThrow(() -> new ResourceNotFoundException("Room not found with the hotel id: " + hotelId +
                         " room id: " + roomId));
         log.debug("Room found with the hotel id: {} and room id: {}", hotelId, roomId);
+
+        return room;
+    }
+
+    Room getRoomByRoomId(Long roomId) {
+        log.debug("Fetch room by the room id: {} ", roomId);
+
+        Room room = roomRepository
+                .findByRoomIdWithHotel(roomId)
+                .orElseThrow(() -> new ResourceNotFoundException("Room not found with the room id: " + roomId));
+        log.debug("Room is found with the hotel id: {} and room id: {}", room.getHotel().getId(), roomId);
+
         return room;
     }
 }

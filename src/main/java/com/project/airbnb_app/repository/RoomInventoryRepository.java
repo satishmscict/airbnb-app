@@ -1,6 +1,7 @@
 package com.project.airbnb_app.repository;
 
 import com.project.airbnb_app.entity.Hotel;
+import com.project.airbnb_app.entity.Room;
 import com.project.airbnb_app.entity.RoomInventory;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
@@ -12,6 +13,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -35,6 +37,8 @@ public interface RoomInventoryRepository extends JpaRepository<RoomInventory, Lo
             @Param("endDate") LocalDate endDate,
             @Param("roomsCount") Integer roomsCount
     );
+
+    List<RoomInventory> findAllByHotelAndRoom(Hotel hotel, Room room);
 
     @Query("""
             SELECT ri
@@ -126,5 +130,34 @@ public interface RoomInventoryRepository extends JpaRepository<RoomInventory, Lo
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
             @Param("roomsCount") Integer roomsCount
+    );
+
+    @Query("""
+            SELECT ri
+            FROM RoomInventory ri
+            WHERE ri.room.id = :roomId
+               AND ri.date between :startDate and :endDate
+            """)
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<RoomInventory> findAndLockInventoryForUpdate(
+            @Param("roomId") Long roomId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
+    @Modifying
+    @Query("""
+            UPDATE RoomInventory ri
+            SET ri.surgeFactor = :surgeFactor,
+                ri.closed = :closed
+            WHERE ri.room.id  = :roomId
+             AND ri.date between :startDate and :endDate
+            """)
+    void updateRoomInventory(
+            @Param("roomId") Long roomId,
+            @Param("surgeFactor") BigDecimal surgeFactor,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("closed") Boolean closed
     );
 }

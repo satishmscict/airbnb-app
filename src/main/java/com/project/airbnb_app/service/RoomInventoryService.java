@@ -1,6 +1,8 @@
 package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.dto.HotelDto;
+import com.project.airbnb_app.dto.RoomInventoryDto;
+import com.project.airbnb_app.dto.RoomInventoryRequestDto;
 import com.project.airbnb_app.dto.request.HotelBookingRequest;
 import com.project.airbnb_app.dto.request.HotelSearchRequest;
 import com.project.airbnb_app.entity.RoomInventory;
@@ -19,6 +21,8 @@ public interface RoomInventoryService {
 
     void findAndLockInventoryForModification(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount);
 
+    List<RoomInventoryDto> getRoomInventoryByRoomId(Long roomId);
+
     void saveAll(List<RoomInventory> roomInventories);
 
     Page<HotelDto> searchHotelsByCityAndAvailability(HotelSearchRequest hotelSearchRequest);
@@ -26,4 +30,6 @@ public interface RoomInventoryService {
     void updateBookedRoomsCount(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount);
 
     List<RoomInventory> updateReservedRoomsCount(HotelBookingRequest hotelBookingRequest);
+
+    void updateRoomInventory(Long roomId, RoomInventoryRequestDto roomInventoryRequestDto);
 }

@@ -1,11 +1,10 @@
 package com.project.airbnb_app.controller;
 
 import com.project.airbnb_app.advice.ApiResponse;
-import com.project.airbnb_app.dto.HotelAndRoomsDto;
-import com.project.airbnb_app.dto.HotelDto;
-import com.project.airbnb_app.dto.HotelMinimumPriceDto;
+import com.project.airbnb_app.dto.*;
 import com.project.airbnb_app.dto.request.HotelMiniumPriceRequest;
 import com.project.airbnb_app.dto.request.HotelSearchRequest;
+import com.project.airbnb_app.service.HotelBookingOrchestratorService;
 import com.project.airbnb_app.service.HotelOrchestratorService;
 import com.project.airbnb_app.service.HotelService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -24,6 +24,7 @@ import java.util.List;
 @Tag(name = "Hotel API")
 public class HotelController {
 
+    private final HotelBookingOrchestratorService hotelBookingOrchestratorService;
     private final HotelOrchestratorService hotelOrchestratorService;
     private final HotelService hotelService;
 
@@ -44,9 +45,31 @@ public class HotelController {
         return ResponseEntity.ok(apiResponse);
     }
 
+    @GetMapping("/{hotelId}/bookings")
+    public ResponseEntity<List<HotelBookingDto>> getAllBookingsByHotelId(@PathVariable Long hotelId) {
+        return ResponseEntity.ok(hotelBookingOrchestratorService.getAllBookingsByHotelId(hotelId));
+    }
+
     @GetMapping
     public ResponseEntity<List<HotelDto>> getAllHotels() {
         return ResponseEntity.ok(hotelService.getAllHotels());
+    }
+
+    @GetMapping("/{hotelId}/booking-report")
+    public ResponseEntity<HotelBookingReportResponseDto> getBookingReportByHotelById(
+            @PathVariable Long hotelId,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate
+    ) {
+        if (startDate == null) {
+            startDate = LocalDate.now().minusMonths(1);
+        }
+
+        if (endDate == null) {
+            endDate = LocalDate.now();
+        }
+
+        return ResponseEntity.ok(hotelBookingOrchestratorService.getBookingReportByHotelIdAndDateRange(hotelId, startDate, endDate));
     }
 
     @GetMapping("/{hotelId}")

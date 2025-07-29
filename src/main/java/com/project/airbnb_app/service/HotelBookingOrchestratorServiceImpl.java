@@ -2,6 +2,7 @@ package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.dto.GuestDto;
 import com.project.airbnb_app.dto.HotelBookingDto;
+import com.project.airbnb_app.dto.HotelBookingReportResponseDto;
 import com.project.airbnb_app.dto.request.HotelBookingRequest;
 import com.project.airbnb_app.entity.*;
 import com.project.airbnb_app.entity.enums.BookingStatus;
@@ -15,6 +16,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
@@ -139,6 +143,56 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
         log.debug("Hotel booking object prepared and saved with the id : {}", savedHotelBooking.getId());
 
         return modelMapper.map(savedHotelBooking, HotelBookingDto.class);
+    }
+
+    @Override
+    public List<HotelBookingDto> getAllBookingsByHotelId(Long hotelId) {
+        Hotel hotel = hotelDomainService.getHotelById(hotelId);
+
+        hotelDomainService.validateHotelOwnership(hotel.getOwner().getId());
+
+        List<HotelBooking> hotelBookingList = hotelBookingRepository.findAllByHotel(hotel);
+        return hotelBookingList.stream()
+                .map((element) -> modelMapper.map(element, HotelBookingDto.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public HotelBookingReportResponseDto getBookingReportByHotelIdAndDateRange(Long hotelId, LocalDate startDate, LocalDate endDate) {
+        Hotel hotel = hotelDomainService.getHotelById(hotelId);
+
+        hotelDomainService.validateHotelOwnership(hotel.getOwner().getId());
+
+        List<HotelBooking> hotelBookingList = hotelBookingRepository.findAllByHotelAndBookingStatusAndCreatedAtBetween(
+                hotel,
+                BookingStatus.CONFIRMED,
+                startDate.atStartOfDay(),
+                endDate.atTime(LocalTime.MAX)
+        );
+
+        int totalBookingCount = hotelBookingList.size();
+        log.debug("Total booking count of the hotelId is : {} and date range between {} and {}", totalBookingCount, startDate, endDate);
+
+        BigDecimal totalRevenue = hotelBookingList.stream()
+                .map(HotelBooking::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        log.debug("Total revenue of the hotelId is : {} and date range between {} and {}", totalRevenue, startDate, endDate);
+
+        BigDecimal averagePerBooking = BigDecimal.ZERO;
+        if (totalBookingCount > 0) {
+            averagePerBooking = totalRevenue.divide(
+                    BigDecimal.valueOf(totalBookingCount),
+                    2,
+                    RoundingMode.HALF_UP
+            );
+        }
+        log.debug("Average revenue per booking is : {} and date range between {} and {}", averagePerBooking, startDate, endDate);
+
+        return HotelBookingReportResponseDto.builder()
+                .totalBookingCount(totalBookingCount)
+                .totalRevenue(totalRevenue)
+                .averageAmount(averagePerBooking)
+                .build();
     }
 
     @Override

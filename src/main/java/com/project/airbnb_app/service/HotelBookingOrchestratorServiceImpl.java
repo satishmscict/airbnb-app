@@ -158,6 +158,16 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
     }
 
     @Override
+    public List<HotelBookingDto> getAllBookingsByUserId() {
+        User user = appUserDomainService.getCurrentUser();
+
+        List<HotelBooking> hotelBookingList = hotelBookingRepository.findAllByUser(user);
+        return hotelBookingList.stream()
+                .map((element) -> modelMapper.map(element, HotelBookingDto.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public HotelBookingReportResponseDto getBookingReportByHotelIdAndDateRange(Long hotelId, LocalDate startDate, LocalDate endDate) {
         Hotel hotel = hotelDomainService.getHotelById(hotelId);
 

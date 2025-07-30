@@ -21,7 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/admin/hotels")
 @RequiredArgsConstructor
-@Tag(name = "Hotel API")
+@Tag(name = "Hotel")
 public class HotelController {
 
     private final HotelBookingOrchestratorService hotelBookingOrchestratorService;

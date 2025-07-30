@@ -18,6 +18,8 @@ public interface HotelBookingOrchestratorService {
 
     List<HotelBookingDto> getAllBookingsByHotelId(Long hotelId);
 
+    List<HotelBookingDto> getAllBookingsByUserId();
+
     HotelBookingReportResponseDto getBookingReportByHotelIdAndDateRange(Long hotelId, LocalDate startDate, LocalDate endDate);
 
     String initiatePayment(Long bookingId);

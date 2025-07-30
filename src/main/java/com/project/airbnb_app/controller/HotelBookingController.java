@@ -19,7 +19,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/bookings")
-@Tag(name = "Hotel Booking API")
+@Tag(name = "Hotel Booking")
 public class HotelBookingController {
 
     private final HotelBookingOrchestratorService hotelBookingOrchestratorService;

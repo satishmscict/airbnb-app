@@ -41,6 +41,11 @@ start [listen the payment staus](https://docs.stripe.com/webhooks/quickstart):
 
 ![img.png](database-view.png)
 
+### **Swagger URL**
+
+- http://localhost:8080/v3/api-docs
+- http://localhost:8080/swagger-ui/index.html
+
 ### **Reference links**
 
 - https://stackoverflow.com/questions/66662013/stripe-login-zsh-command-not-found-stripe (Stripe CLI installation fix)

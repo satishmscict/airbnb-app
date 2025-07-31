@@ -50,7 +50,7 @@ public class HotelBookingController {
 
     @GetMapping("/{bookingId}/status")
     ResponseEntity<Map<String, String>> getBookingStatus(@PathVariable Long bookingId) {
-        return ResponseEntity.ok(Map.of("bookingStatus", hotelBookingService.getBookingStatus(bookingId)));
+        return ResponseEntity.ok(Map.of("bookingStatus", hotelBookingService.getBookingStatusByBookingId(bookingId)));
     }
 
     @GetMapping("/{bookingId}/initPayment")

@@ -58,7 +58,7 @@ public class PriceUpdateServiceImpl implements PriceUpdateService {
         LocalDate startDate = LocalDate.now();
         LocalDate endDate = startDate.plusYears(TOTAL_YEARS);
 
-        List<RoomInventory> roomInventoryList = roomInventoryDomainService.findByHotelAndDateBetween(hotel, startDate, endDate);
+        List<RoomInventory> roomInventoryList = roomInventoryDomainService.getInventoryByHotelAndDateBetween(hotel, startDate, endDate);
 
         updateRoomInventoryPrices(roomInventoryList);
         updateMinimumHotelPrices(hotel, roomInventoryList);
@@ -95,7 +95,7 @@ public class PriceUpdateServiceImpl implements PriceUpdateService {
 
         List<HotelMinimumPrice> hotelMinimumPricesList = new ArrayList<>();
         minimumPricePerDayMap.forEach((localDate, roomPrice) -> {
-            HotelMinimumPrice hotelMinimumPrice = hotelMinimumPriceDomainService.findHotelByHotelAndDate(hotel, localDate)
+            HotelMinimumPrice hotelMinimumPrice = hotelMinimumPriceDomainService.getHotelByHotelAndDate(hotel, localDate)
                     .orElse(
                             new HotelMinimumPrice(hotel, localDate)
                     );

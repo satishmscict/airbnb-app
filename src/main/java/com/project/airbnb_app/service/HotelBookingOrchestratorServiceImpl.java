@@ -46,7 +46,7 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
     public List<GuestDto> assignGuestsToBooking(Long bookingId, List<Long> guestIds) {
         log.debug("Adding guest to bookingId {} and total {} guests available.", bookingId, guestIds.size());
 
-        HotelBooking hotelBooking = hotelBookingDomainService.findById(bookingId);
+        HotelBooking hotelBooking = hotelBookingDomainService.getBookingByBookingId(bookingId);
 
         hotelBookingDomainService.isBookingBelongsToCurrentUser(hotelBooking.getUser().getId());
 
@@ -54,7 +54,7 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
 
         hotelBookingDomainService.checkBookingStatusIsReserved(hotelBooking);
 
-        List<Guest> guestList = guestDomainService.findGuestByIds(guestIds);
+        List<Guest> guestList = guestDomainService.getGuestsByIds(guestIds);
 
         hotelBooking.setBookingStatus(BookingStatus.GUESTS_ADDED);
         hotelBooking.setGuest(guestList.stream().collect(Collectors.toSet()));
@@ -71,7 +71,7 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
     public void cancelBooking(Long bookingId) {
         log.debug("Cancel the of bookingId {}.", bookingId);
 
-        HotelBooking hotelBooking = hotelBookingDomainService.findById(bookingId);
+        HotelBooking hotelBooking = hotelBookingDomainService.getBookingByBookingId(bookingId);
 
         hotelBookingDomainService.isBookingBelongsToCurrentUser(hotelBooking.getUser().getId());
 
@@ -209,7 +209,7 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
     @Override
     public String initiatePayment(Long bookingId) {
         log.debug("Start initiate payment.");
-        HotelBooking hotelBooking = hotelBookingDomainService.findById(bookingId);
+        HotelBooking hotelBooking = hotelBookingDomainService.getBookingByBookingId(bookingId);
 
         hotelBookingDomainService.isBookingBelongsToCurrentUser(hotelBooking.getUser().getId());
 

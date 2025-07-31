@@ -20,7 +20,7 @@ public class RoomInventoryDomainService {
 
     private final RoomInventoryRepository roomInventoryRepository;
 
-    List<RoomInventory> findByHotelAndDateBetween(
+    List<RoomInventory> getInventoryByHotelAndDateBetween(
             Hotel hotel,
             LocalDate startDate,
             LocalDate endDate

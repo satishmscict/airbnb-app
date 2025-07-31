@@ -14,15 +14,15 @@ import org.springframework.stereotype.Service;
 public class AppUserDomainService {
     private final AppUserRepository appUserRepository;
 
-    public User findByEmailOrNull(String email) {
+    public User getByEmailOrNull(String email) {
         return appUserRepository.findByEmail(email).orElse(null);
     }
 
-    public User findByIdOrNull(Long userId) {
+    public User getByIdOrNull(Long userId) {
         return appUserRepository.findById(userId).orElse(null);
     }
 
-    public User findByIdOrThrow(Long userId) {
+    public User getByIdOrThrow(Long userId) {
         return appUserRepository
                 .findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found the given id: " + userId));

@@ -52,7 +52,16 @@ public class HotelBookingDomainService {
         }
     }
 
-    public HotelBooking findByPaymentSessionId(String paymentSessionId) {
+    public HotelBooking getBookingByBookingId(Long bookingId) {
+        return hotelBookingRepository.findById(bookingId)
+                .orElseThrow(() -> {
+                    String errorMessage = String.format("Booking not found with the id: %s", bookingId);
+                    log.error(errorMessage);
+                    return new ResourceNotFoundException(errorMessage);
+                });
+    }
+
+    public HotelBooking getBookingByPaymentSessionId(String paymentSessionId) {
         return hotelBookingRepository.findByPaymentSessionId(paymentSessionId)
                 .orElseThrow(() -> {
                     String errorMessage = String.format("Booking not found for the session id: %s", paymentSessionId);
@@ -61,7 +70,7 @@ public class HotelBookingDomainService {
                 });
     }
 
-    public String getBookingStatus(Long bookingId) {
+    public String getBookingStatusByBookingId(Long bookingId) {
         HotelBooking hotelBooking = hotelBookingRepository.findById(bookingId)
                 .orElseThrow(() -> {
                     String errorMessage = String.format("Booking not found with the id: %s", bookingId);
@@ -81,14 +90,5 @@ public class HotelBookingDomainService {
             log.error(errorMessage);
             throw new UnAuthorizationException(errorMessage);
         }
-    }
-
-    public HotelBooking findById(Long bookingId) {
-        return hotelBookingRepository.findById(bookingId)
-                .orElseThrow(() -> {
-                    String errorMessage = String.format("Booking not found with the id: %s", bookingId);
-                    log.error(errorMessage);
-                    return new ResourceNotFoundException(errorMessage);
-                });
     }
 }

@@ -34,7 +34,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public UserDto createUser(SignupRequest signupRequest) {
         log.trace("Check user already exist with the email: {}", signupRequest.getEmail());
-        User user = appUserDomainService.findByEmailOrNull(signupRequest.getEmail());
+        User user = appUserDomainService.getByEmailOrNull(signupRequest.getEmail());
 
         if (user != null) {
             log.trace("User already exist with the email : {}", signupRequest.getEmail());
@@ -51,7 +51,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .build();
         appUserService.save(user);
 
-        User newUser = appUserDomainService.findByEmailOrNull(user.getEmail());
+        User newUser = appUserDomainService.getByEmailOrNull(user.getEmail());
 
         return modelMapper.map(newUser, UserDto.class);
     }
@@ -59,7 +59,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public String renew(String refreshToken) {
         Long userId = jwtService.getUserIdFromAccessToken(refreshToken);
-        User user = appUserDomainService.findByIdOrThrow(userId);
+        User user = appUserDomainService.getByIdOrThrow(userId);
 
         return jwtService.createAccessToken(user);
     }

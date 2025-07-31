@@ -164,7 +164,11 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
     }
 
     @Override
-    public HotelBookingReportResponseDto getBookingReportByHotelIdAndDateRange(Long hotelId, LocalDate startDate, LocalDate endDate) {
+    public HotelBookingReportResponseDto getBookingReportByHotelIdAndDateRange(
+            Long hotelId,
+            LocalDate startDate,
+            LocalDate endDate
+    ) {
         Hotel hotel = hotelDomainService.getHotelById(hotelId);
 
         hotelDomainService.validateHotelOwnership(hotel.getOwner().getId());

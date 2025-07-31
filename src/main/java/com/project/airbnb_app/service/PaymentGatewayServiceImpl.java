@@ -108,7 +108,7 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
             Session session = (Session) event.getDataObjectDeserializer().getObject().orElse(null);
             if (session == null) return;
 
-            HotelBooking hotelBooking = hotelBookingDomainService.findByPaymentSessionId(session.getId());
+            HotelBooking hotelBooking = hotelBookingDomainService.getBookingByPaymentSessionId(session.getId());
 
             hotelBooking.setBookingStatus(BookingStatus.CONFIRMED);
             hotelBookingService.saveBooking(hotelBooking);

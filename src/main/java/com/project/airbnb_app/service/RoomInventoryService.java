@@ -1,8 +1,9 @@
 package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.dto.HotelDto;
-import com.project.airbnb_app.dto.request.HotelBookingRequest;
+import com.project.airbnb_app.dto.RoomInventoryDto;
 import com.project.airbnb_app.dto.request.HotelSearchRequest;
+import com.project.airbnb_app.dto.request.RoomInventoryRequest;
 import com.project.airbnb_app.entity.RoomInventory;
 import org.springframework.data.domain.Page;
 
@@ -19,11 +20,13 @@ public interface RoomInventoryService {
 
     void findAndLockInventoryForModification(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount);
 
+    List<RoomInventoryDto> getRoomInventoryByRoomId(Long roomId);
+
     void saveAll(List<RoomInventory> roomInventories);
 
     Page<HotelDto> searchHotelsByCityAndAvailability(HotelSearchRequest hotelSearchRequest);
 
     void updateBookedRoomsCount(Long roomId, LocalDate checkInDate, LocalDate checkOutDate, Integer roomsCount);
 
-    List<RoomInventory> updateReservedRoomsCount(HotelBookingRequest hotelBookingRequest);
+    void updateRoomInventory(Long roomId, RoomInventoryRequest roomInventoryRequest);
 }

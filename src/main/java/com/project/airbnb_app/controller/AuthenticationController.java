@@ -1,10 +1,10 @@
 package com.project.airbnb_app.controller;
 
 import com.project.airbnb_app.advice.ApiResponse;
-import com.project.airbnb_app.dto.LoginResponseDto;
+import com.project.airbnb_app.dto.LoginDto;
 import com.project.airbnb_app.dto.UserDto;
-import com.project.airbnb_app.dto.request.LoginRequestDto;
-import com.project.airbnb_app.dto.request.SignupDto;
+import com.project.airbnb_app.dto.request.LoginRequest;
+import com.project.airbnb_app.dto.request.SignupRequest;
 import com.project.airbnb_app.service.AuthenticationService;
 import com.project.airbnb_app.util.CookieManager;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,16 +26,16 @@ public class AuthenticationController {
     private final CookieManager cookieManager;
 
     @PostMapping
-    ResponseEntity<UserDto> createUser(@Valid @RequestBody SignupDto signupDto) {
-        UserDto userDto = authenticationService.createUser(signupDto);
+    ResponseEntity<UserDto> createUser(@Valid @RequestBody SignupRequest signupRequest) {
+        UserDto userDto = authenticationService.createUser(signupRequest);
         return ResponseEntity.ok(userDto);
     }
 
     @PostMapping("/login")
-    ResponseEntity<LoginResponseDto> login(HttpServletResponse httpServletResponse, @Valid @RequestBody LoginRequestDto loginRequestDto) {
-        LoginResponseDto loginResponseDto = authenticationService.signInUser(loginRequestDto);
-        cookieManager.addRefreshTokenCookie(httpServletResponse, loginResponseDto.getRefreshToken());
-        return ResponseEntity.ok(loginResponseDto);
+    ResponseEntity<LoginDto> login(HttpServletResponse httpServletResponse, @Valid @RequestBody LoginRequest loginRequest) {
+        LoginDto loginDto = authenticationService.signInUser(loginRequest);
+        cookieManager.addRefreshTokenCookie(httpServletResponse, loginDto.getRefreshToken());
+        return ResponseEntity.ok(loginDto);
     }
 
     @GetMapping("/renew")

@@ -2,6 +2,7 @@ package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.dto.GuestDto;
 import com.project.airbnb_app.dto.HotelBookingDto;
+import com.project.airbnb_app.dto.HotelBookingReportDto;
 import com.project.airbnb_app.dto.request.HotelBookingRequest;
 import com.project.airbnb_app.entity.*;
 import com.project.airbnb_app.entity.enums.BookingStatus;
@@ -15,6 +16,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
@@ -28,21 +32,21 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
     private final AppUserDomainService appUserDomainService;
     private final DynamicRoomPricingService dynamicRoomPricingService;
     private final GuestDomainService guestDomainService;
-    private final GuestService guestService;
     private final HotelBookingDomainService hotelBookingDomainService;
     private final HotelBookingRepository hotelBookingRepository;
     private final HotelDomainService hotelDomainService;
     private final ModelMapper modelMapper;
     private final PaymentGatewayService paymentGatewayService;
     private final RoomDomainService roomDomainService;
+    private final RoomInventoryDomainService roomInventoryDomainService;
     private final RoomInventoryService roomInventoryService;
 
     @Override
     @Transactional
-    public List<GuestDto> addGuestsToBooking(Long bookingId, List<GuestDto> guestDtoList) {
-        log.debug("Adding guest to bookingId {} and total {} guests available.", bookingId, guestDtoList.size());
+    public List<GuestDto> assignGuestsToBooking(Long bookingId, List<Long> guestIds) {
+        log.debug("Adding guest to bookingId {} and total {} guests available.", bookingId, guestIds.size());
 
-        HotelBooking hotelBooking = hotelBookingDomainService.findById(bookingId);
+        HotelBooking hotelBooking = hotelBookingDomainService.getBookingByBookingId(bookingId);
 
         hotelBookingDomainService.isBookingBelongsToCurrentUser(hotelBooking.getUser().getId());
 
@@ -50,10 +54,7 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
 
         hotelBookingDomainService.checkBookingStatusIsReserved(hotelBooking);
 
-        List<GuestDto> savedGuestDtoList = guestService.addGuests(guestDtoList);
-
-        List<Long> guestIds = savedGuestDtoList.stream().map(GuestDto::getId).toList();
-        List<Guest> guestList = guestDomainService.findGuestByIds(guestIds);
+        List<Guest> guestList = guestDomainService.getGuestsByIds(guestIds);
 
         hotelBooking.setBookingStatus(BookingStatus.GUESTS_ADDED);
         hotelBooking.setGuest(guestList.stream().collect(Collectors.toSet()));
@@ -70,7 +71,7 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
     public void cancelBooking(Long bookingId) {
         log.debug("Cancel the of bookingId {}.", bookingId);
 
-        HotelBooking hotelBooking = hotelBookingDomainService.findById(bookingId);
+        HotelBooking hotelBooking = hotelBookingDomainService.getBookingByBookingId(bookingId);
 
         hotelBookingDomainService.isBookingBelongsToCurrentUser(hotelBooking.getUser().getId());
 
@@ -103,14 +104,14 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
 
         // Validating reserved rooms availability.
         long daysCount = ChronoUnit.DAYS.between(hotelBookingRequest.getCheckInDate(), hotelBookingRequest.getCheckOutDate()) + 1;
-        List<RoomInventory> roomInventoryList = roomInventoryService.updateReservedRoomsCount(hotelBookingRequest);
+        List<RoomInventory> roomInventoryList = roomInventoryDomainService.updateReservedRoomsCount(hotelBookingRequest);
         if (daysCount != roomInventoryList.size()) {
             throw new IllegalStateException("Rooms not available for " + daysCount + " days.");
         }
 
         Hotel hotel = hotelDomainService.getHotelByIdAndIsActivated(hotelBookingRequest.getHotelId());
 
-        Room room = roomDomainService.getRoomById(
+        Room room = roomDomainService.getRoomByHotelIdAndRoomId(
                 hotelBookingRequest.getRoomId(),
                 hotelBookingRequest.getHotelId()
         );
@@ -142,9 +143,73 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
     }
 
     @Override
+    public List<HotelBookingDto> getAllBookingsByHotelId(Long hotelId) {
+        Hotel hotel = hotelDomainService.getHotelById(hotelId);
+
+        hotelDomainService.validateHotelOwnership(hotel.getOwner().getId());
+
+        List<HotelBooking> hotelBookingList = hotelBookingRepository.findAllByHotel(hotel);
+        return hotelBookingList.stream()
+                .map((element) -> modelMapper.map(element, HotelBookingDto.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<HotelBookingDto> getAllBookingsByUserId() {
+        User user = appUserDomainService.getCurrentUser();
+
+        List<HotelBooking> hotelBookingList = hotelBookingRepository.findAllByUser(user);
+        return hotelBookingList.stream()
+                .map((element) -> modelMapper.map(element, HotelBookingDto.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public HotelBookingReportDto getBookingReportByHotelIdAndDateRange(
+            Long hotelId,
+            LocalDate startDate,
+            LocalDate endDate
+    ) {
+        Hotel hotel = hotelDomainService.getHotelById(hotelId);
+
+        hotelDomainService.validateHotelOwnership(hotel.getOwner().getId());
+
+        List<HotelBooking> hotelBookingList = hotelBookingRepository.findAllByHotelAndBookingStatusAndCreatedAtBetween(
+                hotel,
+                BookingStatus.CONFIRMED,
+                startDate.atStartOfDay(),
+                endDate.atTime(LocalTime.MAX)
+        );
+
+        int totalBookingCount = hotelBookingList.size();
+        log.debug("Total booking count of the hotelId is : {} and date range between {} and {}", totalBookingCount, startDate, endDate);
+
+        BigDecimal totalRevenue = hotelBookingList.stream()
+                .map(HotelBooking::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        log.debug("Total revenue of the hotelId is : {} and date range between {} and {}", totalRevenue, startDate, endDate);
+
+        BigDecimal averagePerBooking = BigDecimal.ZERO;
+        if (totalBookingCount > 0) {
+            averagePerBooking = totalRevenue.divide(
+                    BigDecimal.valueOf(totalBookingCount),
+                    2,
+                    RoundingMode.HALF_UP
+            );
+        }
+        log.debug("Average revenue per booking is : {} and date range between {} and {}", averagePerBooking, startDate, endDate);
+
+        return HotelBookingReportDto.builder()
+                .totalBookingCount(totalBookingCount)
+                .totalRevenue(totalRevenue)
+                .averageAmount(averagePerBooking)
+                .build();
+    }
+
+    @Override
     public String initiatePayment(Long bookingId) {
         log.debug("Start initiate payment.");
-        HotelBooking hotelBooking = hotelBookingDomainService.findById(bookingId);
+        HotelBooking hotelBooking = hotelBookingDomainService.getBookingByBookingId(bookingId);
 
         hotelBookingDomainService.isBookingBelongsToCurrentUser(hotelBooking.getUser().getId());
 

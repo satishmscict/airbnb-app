@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class HotelOrchestratorServiceImpl implements HotelOrchestratorService {
 
+    private final AppUserDomainService appUserDomainService;
     private final HotelDomainService hotelDomainService;
     private final HotelMinimPriceService hotelMinimPriceService;
     private final HotelService hotelService;

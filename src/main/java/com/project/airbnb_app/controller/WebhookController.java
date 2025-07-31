@@ -4,6 +4,7 @@ import com.project.airbnb_app.service.PaymentGatewayService;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.model.Event;
 import com.stripe.net.Webhook;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/webhook")
 @Slf4j
+@Tag(name = "Webhook")
 public class WebhookController {
 
     private final PaymentGatewayService paymentGatewayService;

@@ -4,7 +4,7 @@ import com.project.airbnb_app.entity.HotelBooking;
 
 public interface HotelBookingService {
 
-    String getBookingStatus(Long bookingId);
+    String getBookingStatusByBookingId(Long bookingId);
 
     void saveBooking(HotelBooking hotelBooking);
 }

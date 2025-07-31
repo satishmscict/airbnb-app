@@ -17,7 +17,7 @@ public class HotelMinimumPriceDomainService {
 
     private final HotelMinimumPriceRepository hotelMinimumPriceRepository;
 
-    Optional<HotelMinimumPrice> findHotelByHotelAndDate(Hotel hotel, LocalDate localDate) {
+    Optional<HotelMinimumPrice> getHotelByHotelAndDate(Hotel hotel, LocalDate localDate) {
         return hotelMinimumPriceRepository.findHotelByHotelAndDate(hotel, localDate);
     }
 }

@@ -5,9 +5,7 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 @Data
-public class SignupDto {
-    @NotEmpty(message = "Please enter name.")
-    private String name;
+public class LoginRequest {
 
     @Email(message = "Please enter valid email.")
     private String email;

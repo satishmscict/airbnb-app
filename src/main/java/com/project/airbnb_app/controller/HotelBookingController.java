@@ -2,7 +2,7 @@ package com.project.airbnb_app.controller;
 
 import com.project.airbnb_app.dto.GuestDto;
 import com.project.airbnb_app.dto.HotelBookingDto;
-import com.project.airbnb_app.dto.request.GuestCreateDto;
+import com.project.airbnb_app.dto.request.GuestIdsForBookingRequest;
 import com.project.airbnb_app.dto.request.HotelBookingRequest;
 import com.project.airbnb_app.service.HotelBookingOrchestratorService;
 import com.project.airbnb_app.service.HotelBookingService;
@@ -19,18 +19,18 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/bookings")
-@Tag(name = "Hotel Booking API")
+@Tag(name = "Hotel Booking")
 public class HotelBookingController {
 
     private final HotelBookingOrchestratorService hotelBookingOrchestratorService;
     private final HotelBookingService hotelBookingService;
 
     @PostMapping("/{bookingId}/guests")
-    ResponseEntity<List<GuestDto>> addGuestsToBooking(@PathVariable Long bookingId, @RequestBody GuestCreateDto guestCreate) {
+    ResponseEntity<List<GuestDto>> assignGuestsToBooking(@PathVariable Long bookingId, @RequestBody GuestIdsForBookingRequest guestIdsForBookingRequest) {
         return new ResponseEntity<>(
-                hotelBookingOrchestratorService.addGuestsToBooking(
+                hotelBookingOrchestratorService.assignGuestsToBooking(
                         bookingId,
-                        guestCreate.getGuest()
+                        guestIdsForBookingRequest.getGuestIds()
                 ),
                 HttpStatus.CREATED
         );
@@ -50,7 +50,7 @@ public class HotelBookingController {
 
     @GetMapping("/{bookingId}/status")
     ResponseEntity<Map<String, String>> getBookingStatus(@PathVariable Long bookingId) {
-        return ResponseEntity.ok(Map.of("bookingStatus", hotelBookingService.getBookingStatus(bookingId)));
+        return ResponseEntity.ok(Map.of("bookingStatus", hotelBookingService.getBookingStatusByBookingId(bookingId)));
     }
 
     @GetMapping("/{bookingId}/initPayment")

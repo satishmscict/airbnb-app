@@ -11,13 +11,12 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class HotelBookingServiceImpl implements HotelBookingService {
 
-    private final AppUserDomainService appUserDomainService;
     private final HotelBookingDomainService hotelBookingDomainService;
     private final HotelBookingRepository hotelBookingRepository;
 
     @Override
-    public String getBookingStatus(Long bookingId) {
-        return hotelBookingDomainService.getBookingStatus(bookingId);
+    public String getBookingStatusByBookingId(Long bookingId) {
+        return hotelBookingDomainService.getBookingStatusByBookingId(bookingId);
     }
 
     @Override

@@ -6,5 +6,11 @@ import java.util.List;
 
 public interface GuestService {
 
-    List<GuestDto> addGuests(List<GuestDto> guestDtoList);
+    List<GuestDto> createGuests(List<GuestDto> guestDtoList);
+
+    void deleteGuest(Long guestId);
+
+    GuestDto getGuestById(Long guestId);
+
+    GuestDto updateGuest(Long guestId, GuestDto guestDto);
 }

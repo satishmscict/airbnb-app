@@ -43,7 +43,9 @@ public class HotelServiceImpl implements HotelService {
     public List<HotelDto> getAllHotels() {
         log.debug("Getting all hotels preparing.");
 
-        List<Hotel> hotels = hotelRepository.findByActive(true);
+        User user = appUserDomainService.getCurrentUser();
+
+        List<Hotel> hotels = hotelRepository.findByOwnerAndActive(user, true);
         log.debug("Get all hotels completed and total {} hotels found.", hotels.size());
 
         List<HotelDto> hotelDtoList = hotels

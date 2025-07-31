@@ -51,7 +51,7 @@ public class RoomServiceImpl implements RoomService {
             throw new ResourceNotFoundException("Hotel not found with the id: " + hotelId);
         }
 
-        Room room = roomDomainService.getRoomById(hotelId, roomId);
+        Room room = roomDomainService.getRoomByHotelIdAndRoomId(hotelId, roomId);
         hotelDomainService.validateHotelOwnership(room.getHotel().getOwner().getId());
 
         log.debug("Hotel and Room exist, continue deleting...");
@@ -86,6 +86,9 @@ public class RoomServiceImpl implements RoomService {
         room.setHotel(hotel);
         Room savedRoom = roomRepository.save(room);
         log.debug("Room updated successfully.");
+
+        // TODO: Everytime room is updated need to regenerate the inventory.
+        //  And need to cross we are loss the previous bookedRoomsCount or not ?
 
         return modelMapper.map(savedRoom, RoomDto.class);
     }

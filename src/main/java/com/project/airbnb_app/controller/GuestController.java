@@ -1,7 +1,7 @@
 package com.project.airbnb_app.controller;
 
 import com.project.airbnb_app.dto.GuestDto;
-import com.project.airbnb_app.dto.request.GuestCreateRequestDto;
+import com.project.airbnb_app.dto.request.GuestCreateRequest;
 import com.project.airbnb_app.service.GuestService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +20,8 @@ public class GuestController {
     private final GuestService guestService;
 
     @PostMapping
-    ResponseEntity<List<GuestDto>> createGuest(@RequestBody GuestCreateRequestDto guestCreateRequestDto) {
-        return ResponseEntity.ok(guestService.createGuests(guestCreateRequestDto.getGuests()));
+    ResponseEntity<List<GuestDto>> createGuest(@RequestBody GuestCreateRequest guestCreateRequest) {
+        return ResponseEntity.ok(guestService.createGuests(guestCreateRequest.getGuests()));
     }
 
     @DeleteMapping("/{guestId}")

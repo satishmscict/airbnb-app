@@ -56,7 +56,7 @@ public class HotelController {
     }
 
     @GetMapping("/{hotelId}/booking-report")
-    public ResponseEntity<HotelBookingReportResponseDto> getBookingReportByHotelById(
+    public ResponseEntity<HotelBookingReportDto> getBookingReportByHotelById(
             @PathVariable Long hotelId,
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate

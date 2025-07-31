@@ -1,7 +1,7 @@
 package com.project.airbnb_app.controller;
 
 import com.project.airbnb_app.dto.RoomInventoryDto;
-import com.project.airbnb_app.dto.RoomInventoryRequestDto;
+import com.project.airbnb_app.dto.request.RoomInventoryRequest;
 import com.project.airbnb_app.service.RoomInventoryService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +25,8 @@ public class RoomInventoryController {
     }
 
     @PatchMapping("rooms/{roomId}")
-    public ResponseEntity<Map<String, String>> updateRoomInventory(@PathVariable Long roomId, @RequestBody RoomInventoryRequestDto roomInventoryRequestDto) {
-        roomInventoryService.updateRoomInventory(roomId, roomInventoryRequestDto);
+    public ResponseEntity<Map<String, String>> updateRoomInventory(@PathVariable Long roomId, @RequestBody RoomInventoryRequest roomInventoryRequest) {
+        roomInventoryService.updateRoomInventory(roomId, roomInventoryRequest);
         return ResponseEntity.ok(Map.of("status", "Inventory updated successfully."));
     }
 }

@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Builder
 @Data
-public class HotelBookingReportResponseDto {
+public class HotelBookingReportDto {
     private BigDecimal averageAmount;
     private Integer totalBookingCount;
     private BigDecimal totalRevenue;

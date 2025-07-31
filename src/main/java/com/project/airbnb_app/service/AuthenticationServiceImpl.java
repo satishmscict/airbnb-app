@@ -1,9 +1,9 @@
 package com.project.airbnb_app.service;
 
-import com.project.airbnb_app.dto.LoginResponseDto;
+import com.project.airbnb_app.dto.LoginDto;
 import com.project.airbnb_app.dto.UserDto;
-import com.project.airbnb_app.dto.request.LoginRequestDto;
-import com.project.airbnb_app.dto.request.SignupDto;
+import com.project.airbnb_app.dto.request.LoginRequest;
+import com.project.airbnb_app.dto.request.SignupRequest;
 import com.project.airbnb_app.entity.User;
 import com.project.airbnb_app.entity.enums.Role;
 import com.project.airbnb_app.exception.ResourceNotFoundException;
@@ -32,20 +32,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final ModelMapper modelMapper;
 
     @Override
-    public UserDto createUser(SignupDto signupDto) {
-        log.trace("Check user already exist with the email: {}", signupDto.getEmail());
-        User user = appUserDomainService.findByEmailOrNull(signupDto.getEmail());
+    public UserDto createUser(SignupRequest signupRequest) {
+        log.trace("Check user already exist with the email: {}", signupRequest.getEmail());
+        User user = appUserDomainService.findByEmailOrNull(signupRequest.getEmail());
 
         if (user != null) {
-            log.trace("User already exist with the email : {}", signupDto.getEmail());
-            throw new ResourceNotFoundException("User already exist with the email id: " + signupDto.getEmail());
+            log.trace("User already exist with the email : {}", signupRequest.getEmail());
+            throw new ResourceNotFoundException("User already exist with the email id: " + signupRequest.getEmail());
         }
 
-        log.trace("User not exist and create new user with email: {}", signupDto.getEmail());
-        String encryptPassword = bCryptPasswordEncoder.encode(signupDto.getPassword());
+        log.trace("User not exist and create new user with email: {}", signupRequest.getEmail());
+        String encryptPassword = bCryptPasswordEncoder.encode(signupRequest.getPassword());
         user = User.builder()
-                .name(signupDto.getName())
-                .email(signupDto.getEmail())
+                .name(signupRequest.getName())
+                .email(signupRequest.getEmail())
                 .password(encryptPassword)
                 .roles(Set.of(Role.GUEST))
                 .build();
@@ -65,10 +65,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public LoginResponseDto signInUser(LoginRequestDto loginRequestDto) {
+    public LoginDto signInUser(LoginRequest loginRequest) {
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                loginRequestDto.getEmail(),
-                loginRequestDto.getPassword()
+                loginRequest.getEmail(),
+                loginRequest.getPassword()
         );
         Authentication authentication = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
 
@@ -76,7 +76,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String accessToken = jwtService.createAccessToken(user);
         String refreshToken = jwtService.createRefreshToken(user);
 
-        return LoginResponseDto.builder()
+        return LoginDto.builder()
                 .userId(user.getId())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)

@@ -1,7 +1,7 @@
 package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.dto.UserDto;
-import com.project.airbnb_app.dto.request.ProfileUpdateRequestDto;
+import com.project.airbnb_app.dto.request.ProfileUpdateRequest;
 import com.project.airbnb_app.entity.User;
 import com.project.airbnb_app.exception.ResourceNotFoundException;
 import com.project.airbnb_app.repository.AppUserRepository;
@@ -41,20 +41,20 @@ public class AppUserServiceImpl implements AppUserService, UserDetailsService {
     }
 
     @Override
-    public void updateUserProfile(Long userId, ProfileUpdateRequestDto profileUpdateRequestDto) {
+    public void updateUserProfile(Long userId, ProfileUpdateRequest profileUpdateRequest) {
         log.debug("Start update user profile with the userID : {}", userId);
         User user = appUserDomainService.getCurrentUser();
 
         validateUser(userId);
 
-        if (profileUpdateRequestDto.getDateOfBirth() != null) {
-            user.setDateOfBirth(profileUpdateRequestDto.getDateOfBirth());
+        if (profileUpdateRequest.getDateOfBirth() != null) {
+            user.setDateOfBirth(profileUpdateRequest.getDateOfBirth());
         }
-        if (profileUpdateRequestDto.getGender() != null) {
-            user.setGender(profileUpdateRequestDto.getGender());
+        if (profileUpdateRequest.getGender() != null) {
+            user.setGender(profileUpdateRequest.getGender());
         }
-        if (profileUpdateRequestDto.getName() != null) {
-            user.setName(profileUpdateRequestDto.getName());
+        if (profileUpdateRequest.getName() != null) {
+            user.setName(profileUpdateRequest.getName());
         }
 
         appUserRepository.save(user);

@@ -1,4 +1,4 @@
-package com.project.airbnb_app.dto;
+package com.project.airbnb_app.dto.request;
 
 import lombok.Data;
 
@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
-public class RoomInventoryRequestDto {
+public class RoomInventoryRequest {
     private LocalDate startDate;
     private LocalDate endDate;
     private Boolean closed;

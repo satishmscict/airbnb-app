@@ -2,7 +2,7 @@ package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.dto.GuestDto;
 import com.project.airbnb_app.dto.HotelBookingDto;
-import com.project.airbnb_app.dto.HotelBookingReportResponseDto;
+import com.project.airbnb_app.dto.HotelBookingReportDto;
 import com.project.airbnb_app.dto.request.HotelBookingRequest;
 import com.project.airbnb_app.entity.*;
 import com.project.airbnb_app.entity.enums.BookingStatus;
@@ -38,6 +38,7 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
     private final ModelMapper modelMapper;
     private final PaymentGatewayService paymentGatewayService;
     private final RoomDomainService roomDomainService;
+    private final RoomInventoryDomainService roomInventoryDomainService;
     private final RoomInventoryService roomInventoryService;
 
     @Override
@@ -103,7 +104,7 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
 
         // Validating reserved rooms availability.
         long daysCount = ChronoUnit.DAYS.between(hotelBookingRequest.getCheckInDate(), hotelBookingRequest.getCheckOutDate()) + 1;
-        List<RoomInventory> roomInventoryList = roomInventoryService.updateReservedRoomsCount(hotelBookingRequest);
+        List<RoomInventory> roomInventoryList = roomInventoryDomainService.updateReservedRoomsCount(hotelBookingRequest);
         if (daysCount != roomInventoryList.size()) {
             throw new IllegalStateException("Rooms not available for " + daysCount + " days.");
         }
@@ -164,7 +165,7 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
     }
 
     @Override
-    public HotelBookingReportResponseDto getBookingReportByHotelIdAndDateRange(
+    public HotelBookingReportDto getBookingReportByHotelIdAndDateRange(
             Long hotelId,
             LocalDate startDate,
             LocalDate endDate
@@ -198,7 +199,7 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
         }
         log.debug("Average revenue per booking is : {} and date range between {} and {}", averagePerBooking, startDate, endDate);
 
-        return HotelBookingReportResponseDto.builder()
+        return HotelBookingReportDto.builder()
                 .totalBookingCount(totalBookingCount)
                 .totalRevenue(totalRevenue)
                 .averageAmount(averagePerBooking)

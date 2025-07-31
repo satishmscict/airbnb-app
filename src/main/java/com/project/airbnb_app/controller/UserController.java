@@ -2,7 +2,7 @@ package com.project.airbnb_app.controller;
 
 import com.project.airbnb_app.dto.HotelBookingDto;
 import com.project.airbnb_app.dto.UserDto;
-import com.project.airbnb_app.dto.request.ProfileUpdateRequestDto;
+import com.project.airbnb_app.dto.request.ProfileUpdateRequest;
 import com.project.airbnb_app.service.AppUserService;
 import com.project.airbnb_app.service.HotelBookingOrchestratorService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,9 +25,9 @@ public class UserController {
     @PatchMapping("/{userId}/profile")
     public ResponseEntity<Map<String, String>> updateUserProfile(
             @PathVariable Long userId,
-            @RequestBody ProfileUpdateRequestDto profileUpdateRequestDto
+            @RequestBody ProfileUpdateRequest profileUpdateRequest
     ) {
-        appUserService.updateUserProfile(userId, profileUpdateRequestDto);
+        appUserService.updateUserProfile(userId, profileUpdateRequest);
         return ResponseEntity.ok(Map.of("status", "Profile updated successfully"));
     }
 

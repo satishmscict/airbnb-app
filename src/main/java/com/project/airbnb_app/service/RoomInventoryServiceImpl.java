@@ -2,14 +2,12 @@ package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.dto.HotelDto;
 import com.project.airbnb_app.dto.RoomInventoryDto;
-import com.project.airbnb_app.dto.RoomInventoryRequestDto;
-import com.project.airbnb_app.dto.request.HotelBookingRequest;
 import com.project.airbnb_app.dto.request.HotelSearchRequest;
+import com.project.airbnb_app.dto.request.RoomInventoryRequest;
 import com.project.airbnb_app.entity.Hotel;
 import com.project.airbnb_app.entity.Room;
 import com.project.airbnb_app.entity.RoomInventory;
 import com.project.airbnb_app.repository.RoomInventoryRepository;
-import jakarta.persistence.OptimisticLockException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -152,23 +150,7 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
 
     @Transactional
     @Override
-    public List<RoomInventory> updateReservedRoomsCount(HotelBookingRequest hotelBookingRequest) {
-        List<RoomInventory> roomInventoryList = findAndLockAvailableInventory(hotelBookingRequest);
-
-        roomInventoryRepository.updateReservedRoomsCount(
-                hotelBookingRequest.getRoomId(),
-                hotelBookingRequest.getCheckInDate().toLocalDate(),
-                hotelBookingRequest.getCheckOutDate().toLocalDate(),
-                hotelBookingRequest.getBookedRoomsCount()
-        );
-        log.debug("Update reserve room count with the room inventory completed.");
-
-        return roomInventoryList;
-    }
-
-    @Transactional
-    @Override
-    public void updateRoomInventory(Long roomId, RoomInventoryRequestDto roomInventoryRequestDto) {
+    public void updateRoomInventory(Long roomId, RoomInventoryRequest roomInventoryRequest) {
         Room room = roomDomainService.getRoomByRoomId(roomId);
 
         hotelDomainService.validateHotelOwnership(room.getHotel().getOwner().getId());
@@ -176,33 +158,19 @@ public class RoomInventoryServiceImpl implements RoomInventoryService {
         // Lock the inventory records for update
         roomInventoryRepository.findAndLockInventoryForUpdate(
                 roomId,
-                roomInventoryRequestDto.getStartDate(),
-                roomInventoryRequestDto.getEndDate()
+                roomInventoryRequest.getStartDate(),
+                roomInventoryRequest.getEndDate()
         );
 
         // Update the inventory records.
         roomInventoryRepository.updateRoomInventory(
                 room.getId(),
-                roomInventoryRequestDto.getSurgeFactor(),
-                roomInventoryRequestDto.getStartDate(),
-                roomInventoryRequestDto.getEndDate(),
-                roomInventoryRequestDto.getClosed()
+                roomInventoryRequest.getSurgeFactor(),
+                roomInventoryRequest.getStartDate(),
+                roomInventoryRequest.getEndDate(),
+                roomInventoryRequest.getClosed()
         );
 
         log.debug("Update room inventory completed.");
-    }
-
-    @Transactional
-    private List<RoomInventory> findAndLockAvailableInventory(HotelBookingRequest hotelBookingRequest) {
-        try {
-            return roomInventoryRepository.findAndLockAvailableInventory(
-                    hotelBookingRequest.getRoomId(),
-                    hotelBookingRequest.getCheckInDate().toLocalDate(),
-                    hotelBookingRequest.getCheckOutDate().toLocalDate(),
-                    hotelBookingRequest.getBookedRoomsCount()
-            );
-        } catch (OptimisticLockException optimisticLockException) {
-            throw new RuntimeException(optimisticLockException);
-        }
     }
 }

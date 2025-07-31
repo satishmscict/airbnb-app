@@ -1,7 +1,7 @@
 package com.project.airbnb_app.service;
 
 import com.project.airbnb_app.dto.UserDto;
-import com.project.airbnb_app.dto.request.ProfileUpdateRequestDto;
+import com.project.airbnb_app.dto.request.ProfileUpdateRequest;
 import com.project.airbnb_app.entity.User;
 
 public interface AppUserService {
@@ -25,7 +25,7 @@ public interface AppUserService {
      * Update the user profile.
      *
      * @param userId                  the user id.
-     * @param profileUpdateRequestDto the profile update details.
+     * @param profileUpdateRequest the profile update details.
      */
-    void updateUserProfile(Long userId, ProfileUpdateRequestDto profileUpdateRequestDto);
+    void updateUserProfile(Long userId, ProfileUpdateRequest profileUpdateRequest);
 }

@@ -2,7 +2,7 @@ package com.project.airbnb_app.controller;
 
 import com.project.airbnb_app.dto.GuestDto;
 import com.project.airbnb_app.dto.HotelBookingDto;
-import com.project.airbnb_app.dto.request.GuestIdsForBookingRequestDto;
+import com.project.airbnb_app.dto.request.GuestIdsForBookingRequest;
 import com.project.airbnb_app.dto.request.HotelBookingRequest;
 import com.project.airbnb_app.service.HotelBookingOrchestratorService;
 import com.project.airbnb_app.service.HotelBookingService;
@@ -26,11 +26,11 @@ public class HotelBookingController {
     private final HotelBookingService hotelBookingService;
 
     @PostMapping("/{bookingId}/guests")
-    ResponseEntity<List<GuestDto>> assignGuestsToBooking(@PathVariable Long bookingId, @RequestBody GuestIdsForBookingRequestDto guestIdsForBookingRequestDto) {
+    ResponseEntity<List<GuestDto>> assignGuestsToBooking(@PathVariable Long bookingId, @RequestBody GuestIdsForBookingRequest guestIdsForBookingRequest) {
         return new ResponseEntity<>(
                 hotelBookingOrchestratorService.assignGuestsToBooking(
                         bookingId,
-                        guestIdsForBookingRequestDto.getGuestIds()
+                        guestIdsForBookingRequest.getGuestIds()
                 ),
                 HttpStatus.CREATED
         );

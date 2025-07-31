@@ -8,6 +8,6 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-public class GuestCreateRequestDto {
+public class GuestCreateRequest {
     private List<GuestDto> guests;
 }

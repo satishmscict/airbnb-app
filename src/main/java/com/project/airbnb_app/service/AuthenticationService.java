@@ -1,19 +1,19 @@
 package com.project.airbnb_app.service;
 
-import com.project.airbnb_app.dto.LoginResponseDto;
+import com.project.airbnb_app.dto.LoginDto;
 import com.project.airbnb_app.dto.UserDto;
-import com.project.airbnb_app.dto.request.LoginRequestDto;
-import com.project.airbnb_app.dto.request.SignupDto;
+import com.project.airbnb_app.dto.request.LoginRequest;
+import com.project.airbnb_app.dto.request.SignupRequest;
 
 public interface AuthenticationService {
 
     /**
      * Create user.
      *
-     * @param signupDto the signup dto
+     * @param signupRequest the signup dto
      * @return the userDto
      */
-    UserDto createUser(SignupDto signupDto);
+    UserDto createUser(SignupRequest signupRequest);
 
     /**
      * Renew refresh token.
@@ -26,8 +26,8 @@ public interface AuthenticationService {
     /**
      * Perform authentication based on LoginRequestDto.
      *
-     * @param loginRequestDto login request object.
+     * @param loginRequest login request object.
      * @return the login LoginResponseDto
      */
-    LoginResponseDto signInUser(LoginRequestDto loginRequestDto);
+    LoginDto signInUser(LoginRequest loginRequest);
 }

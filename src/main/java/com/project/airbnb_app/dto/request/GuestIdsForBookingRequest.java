@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class GuestIdsForBookingRequestDto {
+public class GuestIdsForBookingRequest {
 
     List<Long> guestIds;
 }

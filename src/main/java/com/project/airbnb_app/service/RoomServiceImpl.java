@@ -87,9 +87,8 @@ public class RoomServiceImpl implements RoomService {
         Room savedRoom = roomRepository.save(room);
         log.debug("Room updated successfully.");
 
-        // TODO: Need to cross we are loss the previous bookedRoomsCount or not ?
-        // Everytime room is updated need to regenerate the inventory.
-        roomInventoryService.createInventory(hotelId, savedRoom.getId());
+        // TODO: Everytime room is updated need to regenerate the inventory.
+        //  And need to cross we are loss the previous bookedRoomsCount or not ?
 
         return modelMapper.map(savedRoom, RoomDto.class);
     }

@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface HotelBookingOrchestratorService {
 
-    List<GuestDto> addGuestsToBooking(Long bookingId, List<GuestDto> guestDtoList);
+    List<GuestDto> assignGuestsToBooking(Long bookingId, List<Long> guestIds);
 
     void cancelBooking(Long bookingId);
 

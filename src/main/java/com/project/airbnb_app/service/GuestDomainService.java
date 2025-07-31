@@ -15,7 +15,7 @@ public class GuestDomainService {
 
     private final GuestRepository guestRepository;
 
-    List<Guest> findGuestByIds(List<Long> guestIds) {
+    public List<Guest> findGuestByIds(List<Long> guestIds) {
         return guestRepository.findAllById(guestIds);
     }
 }

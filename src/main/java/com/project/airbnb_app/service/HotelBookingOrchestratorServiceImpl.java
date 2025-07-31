@@ -32,7 +32,6 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
     private final AppUserDomainService appUserDomainService;
     private final DynamicRoomPricingService dynamicRoomPricingService;
     private final GuestDomainService guestDomainService;
-    private final GuestService guestService;
     private final HotelBookingDomainService hotelBookingDomainService;
     private final HotelBookingRepository hotelBookingRepository;
     private final HotelDomainService hotelDomainService;
@@ -43,8 +42,8 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
 
     @Override
     @Transactional
-    public List<GuestDto> addGuestsToBooking(Long bookingId, List<GuestDto> guestDtoList) {
-        log.debug("Adding guest to bookingId {} and total {} guests available.", bookingId, guestDtoList.size());
+    public List<GuestDto> assignGuestsToBooking(Long bookingId, List<Long> guestIds) {
+        log.debug("Adding guest to bookingId {} and total {} guests available.", bookingId, guestIds.size());
 
         HotelBooking hotelBooking = hotelBookingDomainService.findById(bookingId);
 
@@ -54,9 +53,6 @@ public class HotelBookingOrchestratorServiceImpl implements HotelBookingOrchestr
 
         hotelBookingDomainService.checkBookingStatusIsReserved(hotelBooking);
 
-        List<GuestDto> savedGuestDtoList = guestService.addGuests(guestDtoList);
-
-        List<Long> guestIds = savedGuestDtoList.stream().map(GuestDto::getId).toList();
         List<Guest> guestList = guestDomainService.findGuestByIds(guestIds);
 
         hotelBooking.setBookingStatus(BookingStatus.GUESTS_ADDED);

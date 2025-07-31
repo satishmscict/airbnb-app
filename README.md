@@ -49,3 +49,4 @@ start [listen the payment staus](https://docs.stripe.com/webhooks/quickstart):
 ### **Reference links**
 
 - https://stackoverflow.com/questions/66662013/stripe-login-zsh-command-not-found-stripe (Stripe CLI installation fix)
+- https://dashboard.stripe.com/test/settings/developers (Stripe developer console)
